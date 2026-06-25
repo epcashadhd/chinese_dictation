@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="referrer" content="no-referrer">
+<!-- 防搜尋引擎收錄 -->
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet,noimageindex,nocache">
+<meta name="googlebot" content="noindex,nofollow,noarchive,nosnippet">
+<meta name="bingbot" content="noindex,nofollow,noarchive,nosnippet">
+<!-- 防 AI 爬蟲訓練 -->
+<meta name="GPTBot" content="noindex,nofollow">
+<meta name="ChatGPT-User" content="noindex,nofollow">
+<meta name="OAI-SearchBot" content="noindex,nofollow">
+<meta name="ClaudeBot" content="noindex,nofollow">
+<meta name="anthropic-ai" content="noindex,nofollow">
+<meta name="CCBot" content="noindex,nofollow">
+<meta name="PerplexityBot" content="noindex,nofollow">
+<meta name="Bytespider" content="noindex,nofollow">
+<title>默書平台</title>
+<script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{margin:0;padding:0;background:#fff}
+body{font-family:'PingFang TC','PingFang SC','Microsoft JhengHei','Noto Sans CJK',sans-serif;color:#333}
+#app{width:100%;max-width:900px;background:linear-gradient(180deg,#f4f2ff 0%,#fff 28px,#fff 100%);border-bottom:1px solid #e0dcec;padding:24px 20px 40px;margin:0 auto;position:relative;min-height:100vh}
+.screen{display:none}.screen.active{display:block}
+h1{font-size:2.2em;text-align:center;margin-bottom:12px;color:#2d3748;font-weight:700}
+h2{font-size:1.2em;text-align:center;color:#666;margin-bottom:16px;font-weight:400}
+
+/* Buttons */
+.btn{padding:10px 24px;border:none;border-radius:50px;font-size:1em;cursor:pointer;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:8px;touch-action:manipulation;text-decoration:none}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.15)}
+.btn:active{transform:translateY(0)}
+.btn-primary{background:#667eea;color:#fff}
+.btn-success{background:#2ecc71;color:#fff}
+.btn-danger{background:#e74c3c;color:#fff}
+.btn-warning{background:#f39c12;color:#fff}
+.btn-outline{background:#fff;color:#667eea;border:2px solid #667eea}
+.btn-sm{padding:6px 16px;font-size:.85em}
+.btn-lg{padding:14px 36px;font-size:1.1em}
+.btn-block{width:100%}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+.btn-group{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:16px 0}
+
+/* Language toggle */
+.lang-toggle{display:flex;justify-content:center;gap:0;margin:10px auto 24px;background:#f0f0f5;border-radius:50px;padding:4px;max-width:420px;flex-wrap:wrap}
+.lang-opt{padding:8px 18px;border-radius:50px;cursor:pointer;font-weight:600;transition:all .2s;font-size:.88em;border:none;background:transparent;white-space:nowrap;color:#555}
+@media(max-width:480px){.lang-opt{padding:6px 12px;font-size:.8em}}
+.lang-opt.active{background:#667eea;color:#fff;box-shadow:0 2px 8px rgba(102,126,234,.4)}
+
+/* Setup Card Elements */
+.cloud-db-card{background:#f8f9fe;border:2px solid #e2e8f0;border-radius:18px;padding:20px;margin:14px 0 24px;box-shadow:0 4px 16px rgba(102,126,234,.05);transition:all .2s}
+.cloud-db-card:hover{border-color:#cbd5e0}
+.form-select{width:100%;padding:11px 14px;border:2px solid #cbd5e0;border-radius:12px;font-size:.95em;font-family:inherit;color:#2d3748;background-color:#fff;outline:none;cursor:pointer;transition:border-color .2s,box-shadow .2s}
+.form-select:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.15)}
+.form-select:disabled{background-color:#edf2f7;color:#a0aec0;cursor:not-allowed;border-color:#e2e8f0}
+
+textarea{width:100%;padding:14px 16px;border:2px solid #cbd5e0;border-radius:14px;font-size:1.05em;outline:none;transition:border .2s,box-shadow .2s;font-family:inherit;height:160px;resize:vertical;margin-bottom:18px;line-height:1.6;color:#2d3748}
+textarea:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.12)}
+
+/* Dictation header */
+.dictation-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.dictation-header .dict-progress{font-size:1em;color:#4a5568;font-weight:700}
+.dictation-timer{font-size:1.15em;font-weight:700;color:#e74c3c;background:#fff5f5;padding:4px 14px;border-radius:50px;border:1px solid #fed7d7}
+
+/* Flip card */
+.flip-card-wrap{perspective:1000px;margin:12px 0;min-height:180px}
+.flip-card{position:relative;width:100%;min-height:180px;transition:transform .5s ease;transform-style:preserve-3d}
+.flip-card.flipped{transform:rotateY(180deg)}
+.flip-front,.flip-back{position:absolute;top:0;left:0;width:100%;min-height:180px;backface-visibility:hidden;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px}
+.flip-front{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;z-index:2;box-shadow:0 10px 25px rgba(102,126,234,.25)}
+.flip-front .big-char{font-size:3.4em;font-weight:700;text-shadow:0 4px 12px rgba(0,0,0,.2);letter-spacing:2px}
+.flip-front .flip-hint{font-size:.95em;margin-top:8px;opacity:.9}
+.flip-front .flip-ready{position:static;margin-top:16px;background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.45);font-weight:600;padding:8px 24px}
+.flip-front .flip-ready:hover{background:rgba(255,255,255,.3)}
+.flip-back{background:#f8f9fe;transform:rotateY(180deg);padding:14px;border:2px solid #e2e8f0}
+.flip-back .canvas-grid{margin:0;padding:8px;border-radius:12px;gap:8px}
+
+/* Canvas grid */
+.canvas-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:8px 0;padding:14px;background:#f8f9fe;border-radius:14px;min-height:170px}
+.tianzige-wrap{position:relative;display:inline-block}
+.tianzige-canvas{border-radius:10px;cursor:crosshair;touch-action:none;display:block;box-shadow:0 3px 10px rgba(0,0,0,.08);background:#fff}
+.tianzige-wrap .tianzige-canvas{width:160px;height:160px}
+@media(max-width:600px){.tianzige-wrap .tianzige-canvas{width:130px!important;height:130px!important}}
+@media(max-width:400px){.tianzige-wrap .tianzige-canvas{width:105px!important;height:105px!important}}
+.tianzige-overlay{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.tianzige-overlay .correct-char{font-size:3em;font-weight:700;color:rgba(231,76,76,.35);text-shadow:0 0 4px rgba(231,76,76,.1);cursor:pointer;pointer-events:auto}
+
+/* Controls */
+.dict-controls{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:14px 0}
+.dict-controls .btn{justify-content:center;font-size:.88em;padding:8px 18px;min-width:68px}
+
+/* Results */
+.result-item{display:flex;align-items:center;padding:12px 16px;margin:8px 0;border-radius:14px;gap:12px;background:#f8f9fe;border:1px solid #e2e8f0}
+.result-icon{font-size:1.2em;width:32px;text-align:center;font-weight:700;color:#667eea}
+.result-text{flex:1;font-size:1.1em;font-weight:600;color:#2d3748}
+.result-score{text-align:center;margin:24px 0;padding:28px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:20px;color:#fff;box-shadow:0 10px 30px rgba(102,126,234,.3)}
+.result-score .score-num{font-size:3.4em;font-weight:700}
+.result-score .score-label{font-size:1.1em;opacity:.95;margin-top:6px}
+.result-controls{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:24px 0}
+.results-detail{margin:18px 0;max-height:500px;overflow-y:auto;padding-right:4px}
+
+/* Modal */
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,23,42,.5);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:auto}
+.modal{background:#fff;border-radius:22px;padding:30px;max-width:520px;width:92%;text-align:center;box-shadow:0 25px 50px rgba(0,0,0,.25);max-height:85vh;overflow-y:auto}
+.modal h3{margin-bottom:12px;color:#1a202c;font-size:1.4em;font-weight:700}
+.modal p{color:#4a5568;line-height:1.6;font-size:1em}
+.modal .btn-group{margin-top:22px}
+
+/* Timer animation */
+.timer-critical{animation:pulse .7s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.98)}}
+
+/* Dict modal */
+.dict-modal{max-width:400px;text-align:left}
+.dict-header{display:flex;align-items:center;gap:18px;margin-bottom:18px}
+.dict-char{font-size:3.8em;font-weight:700;color:#2d3748;line-height:1}
+.dict-pron{font-size:1.05em;color:#4a5568}
+.dict-pron div{margin:4px 0}
+.dict-pron .label{color:#718096;font-size:.85em;margin-right:8px;font-weight:700}
+.dict-info{display:flex;gap:16px;margin:14px 0;padding:14px 0;border-top:1px solid #edf2f7;border-bottom:1px solid #edf2f7}
+.dict-info-item{text-align:center;flex:1}
+.dict-info-item .val{font-size:1.4em;font-weight:700;color:#2d3748}
+.dict-info-item .lbl{font-size:.82em;color:#718096;margin-top:4px}
+.dict-modal-close{float:right;border:none;background:none;cursor:pointer;font-size:1.3em;color:#a0aec0;padding:4px;transition:color .15s}
+.dict-modal-close:hover{color:#4a5568}
+
+/* Responsive */
+@media(max-width:600px){
+  #app{padding:16px;border-radius:0;margin:0}
+  h1{font-size:1.8em}
+  .result-score .score-num{font-size:2.8em}
+  .list-header-row{flex-direction:column;align-items:flex-start!important;gap:10px}
+}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-thumb{background:#cbd5e0;border-radius:3px}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ===== SETUP SCREEN ===== -->
+<div id="screen-setup" class="screen active">
+  <h1 data-t="默書平台">默書平台</h1>
+
+  <div class="lang-toggle" id="langToggle">
+    <button class="lang-opt active" data-lang="zh-HK" onclick="setLanguage('zh-HK')">粵語（繁體）</button>
+    <button class="lang-opt" data-lang="zh-CN-T" onclick="setLanguage('zh-CN-T')">普通話（繁體）</button>
+    <button class="lang-opt" data-lang="zh-CN" onclick="setLanguage('zh-CN')">普通話（簡體）</button>
+  </div>
+
+  <!-- ===== 學校默書範圍連動區 ===== -->
+  <div class="cloud-db-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;border-bottom:1px solid #e2e8f0;padding-bottom:14px">
+      <div style="font-weight:700;color:#2d3748;font-size:1.1em" data-t="學校默書範圍">
+        學校默書範圍
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span id="sheetStatusBadge" style="font-size:.85em;padding:5px 14px;border-radius:50px;background:#edf2f7;color:#4a5568;font-weight:600">連線中...</span>
+        <button class="btn btn-outline btn-sm" onclick="showConfigPrompt()" style="padding:6px 14px;font-size:.85em;border-width:1.5px" data-t="設定試算表 ID">設定試算表 ID</button>
+      </div>
+    </div>
+
+    <div id="sheetErrorMessage" style="display:none;background:#fff5f5;border:1.5px solid #feb2b2;color:#9b2c2c;border-radius:12px;padding:14px;font-size:.9em;line-height:1.6;margin-bottom:16px"></div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:16px">
+      <div>
+        <label for="gradeSelect" style="display:block;font-size:.9em;font-weight:700;color:#4a5568;margin-bottom:8px" data-t="選擇年級">選擇年級</label>
+        <select id="gradeSelect" class="form-select" onchange="onGradeSelected()" disabled>
+          <option value="">讀取年級中...</option>
+        </select>
+      </div>
+      <div>
+        <label for="chapterSelect" style="display:block;font-size:.9em;font-weight:700;color:#4a5568;margin-bottom:8px" data-t="選擇章節">選擇章節</label>
+        <select id="chapterSelect" class="form-select" onchange="onChapterSelected()" disabled>
+          <option value="">請先選擇年級</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:.88em;color:#4a5568;background:#edf2f7;padding:10px 16px;border-radius:12px">
+      <span id="loadedWordsInfo" style="font-weight:600">準備載入詞語...</span>
+      <button onclick="discoverAndLoadSheet(currentSpreadsheetId)" style="background:none;border:none;color:#667eea;font-weight:700;cursor:pointer;padding:0;font-size:1em" data-t="重新整理">重新整理</button>
+    </div>
+  </div>
+
+  <!-- ===== 默書清單與隨機排序按鈕區 ===== -->
+  <div class="list-header-row" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:12px">
+    <span style="font-size:.95em;color:#4a5568;font-weight:700" data-t="默書清單（每行一個詞語或句子，也可用逗號分隔）">默書清單（每行一個詞語或句子，也可用逗號分隔）</span>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="btn btn-sm" id="shuffleToggle" onclick="toggleShuffle()" style="background:transparent;border:2px solid #cbd5e0;color:#4a5568;border-radius:50px;padding:6px 18px;font-size:.88em;cursor:pointer;transition:all .2s;font-weight:700">
+        隨機排序
+      </button>
+      <button class="btn btn-sm" onclick="saveCustomListPrompt()" style="background:transparent;border:2px solid #cbd5e0;color:#4a5568;border-radius:50px;padding:6px 18px;font-size:.88em;cursor:pointer;transition:all .2s;font-weight:700" data-t="儲存清單">
+        儲存清單
+      </button>
+    </div>
+  </div>
+
+  <textarea id="wordInput" placeholder="例如：早上&#10;中午&#10;晚上&#10;太陽&#10;學校&#10;老師" rows="6"></textarea>
+
+  <button class="btn btn-primary btn-lg btn-block" onclick="startDictation()" id="startBtn" style="padding:16px;font-size:1.15em;margin-top:6px" data-t="開始測驗">開始測驗</button>
+</div>
+
+<!-- ===== DICTATION SCREEN ===== -->
+<div id="screen-dictation" class="screen">
+  <div class="dictation-header">
+    <button class="btn btn-outline btn-sm" onclick="endDictation()" data-t="結束">結束</button>
+    <div class="dict-progress" id="dictProgress">1 / 10</div>
+    <div class="dictation-timer" id="dictTimer" style="display:none">0:30</div>
+  </div>
+
+  <div class="flip-card-wrap">
+    <div class="flip-card" id="flipCard">
+      <div class="flip-front">
+        <div class="big-char" id="flipFrontChar"></div>
+        <div class="flip-hint" id="flipFrontHint"></div>
+        <button class="btn btn-sm btn-outline flip-ready" onclick="flipCard()" data-t="準備好了">準備好了</button>
+      </div>
+      <div class="flip-back">
+        <div class="canvas-grid" id="flipCanvasGrid"></div>
+        <div class="dict-controls">
+          <button class="btn btn-outline btn-sm" onclick="speakCurrent()" data-t="朗讀">朗讀</button>
+          <span id="ttsDebug" style="font-size:.78em;color:#718096;margin-left:4px;align-self:center;font-weight:600"></span>
+          <button class="btn btn-outline btn-sm" onclick="clearAllCanvas()" data-t="清空">清空</button>
+          <button class="btn btn-outline btn-sm" onclick="undoLastStroke()" data-t="復原">復原</button>
+        </div>
+        <div style="text-align:center;margin-top:12px">
+          <button class="btn btn-primary btn-lg" onclick="nextItem()" id="dictNextBtn" style="padding:12px 40px" data-t="下一步">下一步</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RESULTS SCREEN ===== -->
+<div id="screen-results" class="screen">
+  <h1 style="margin-top:16px" data-t="結果">結果</h1>
+  <div class="result-score">
+    <div class="score-num" id="resultScoreNum">0 項</div>
+    <div class="score-label" id="resultScoreLabel">測驗完成</div>
+  </div>
+  <div id="resultDetail" class="results-detail"></div>
+  <div class="result-controls">
+    <button class="btn btn-primary btn-lg" onclick="goSetup()" style="padding:14px 36px" data-t="回到首頁">回到首頁</button>
+  </div>
+</div>
+
+<!-- ===== MODALS ===== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalBox">
+    <h3 id="modalTitle">提示</h3>
+    <p id="modalMsg" style="margin:14px 0;color:#4a5568"></p>
+    <input id="modalInput" style="display:none;width:100%;padding:12px 16px;border:2px solid #cbd5e0;border-radius:12px;font-size:1em;outline:none;font-family:inherit;margin-bottom:16px;color:#2d3748">
+    <div class="btn-group" id="modalActions">
+      <button class="btn btn-primary" id="modalOkBtn" onclick="closeModal()">確定</button>
+    </div>
+    <div class="btn-group" id="modalConfirmActions" style="display:none"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="dictModalOverlay">
+  <div class="modal dict-modal">
+    <button class="dict-modal-close" onclick="closeDictModal()">✕</button>
+    <div id="dictModalContent"></div>
+  </div>
+</div>
+
+</div>
+
+<script>
+// ====== CONFIG ======
+const CANVAS_SIZE = 160;
+const TEST_TIME_PER_CHAR_MS = 15000;
+const TEST_MIN_TIME_MS = 30000;
+
+// ====== FIXED GRADES LIST (P.1 - P.6 & 自訂列表) ======
+const REQUIRED_GRADES = ['P.1', 'P.2', 'P.3', 'P.4', 'P.5', 'P.6', '自訂列表'];
+
+// ====== STATE ======
+let currentSpreadsheetId = '1yF-1sSGs08fjTjA4u5zwuwxBjAFzjAYucrjrZOnAxbA';
+let loadedSheetsData = {};
+
+const state = {
+  lang: 'zh-HK',
+  session: null,
+  canvasStates: [],
+  testTimer: null,
+  testTimeLeft: 0,
+  shuffle: false,
+};
+
+function getSpreadsheetIdFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+  if (id && id.trim()) {
+    return id.trim();
+  }
+  return '1yF-1sSGs08fjTjA4u5zwuwxBjAFzjAYucrjrZOnAxbA';
+}
+
+function parseGvizResponse(rawText) {
+  if (!rawText) return null;
+  const startIdx = rawText.indexOf('{');
+  const endIdx = rawText.lastIndexOf('}');
+  if (startIdx === -1 || endIdx === -1) return null;
+  try {
+    const jsonStr = rawText.substring(startIdx, endIdx + 1);
+    const data = JSON.parse(jsonStr);
+    if (data && data.status === 'ok' && data.table) {
+      return data.table;
+    }
+  } catch(e) {}
+  return null;
+}
+
+function parseTableStructure(table) {
+  if (!table || !table.cols) return { chapters: [], wordsByChapter: {} };
+
+  let colHeaders = [];
+  let dataRows = [];
+
+  const colLabels = table.cols.map(c => (c && c.label != null) ? String(c.label).trim() : '');
+  const hasValidColLabels = colLabels.some(l => l && l !== '題號' && l !== '题号' && l !== 'Index' && l !== 'id' && l !== 'A' && l !== 'B' && !/^[A-Z]+$/.test(l));
+
+  if (hasValidColLabels) {
+    colHeaders = colLabels;
+    dataRows = table.rows || [];
+  } else if (table.rows && table.rows.length > 0) {
+    const firstRow = table.rows[0];
+    colHeaders = (firstRow.c || []).map(cell => {
+      if (!cell) return '';
+      let v = (cell.v != null) ? cell.v : cell.f;
+      return v != null ? String(v).trim() : '';
+    });
+    dataRows = table.rows.slice(1);
+  } else {
+    colHeaders = colLabels;
+    dataRows = [];
+  }
+
+  const chapters = [];
+  const wordsByChapter = {};
+
+  colHeaders.forEach((header, idx) => {
+    if (idx === 0) return; // Skip Column A (題號)
+    if (!header || header === '題號' || header === '题号' || header.toLowerCase() === 'index' || /^[A-Z]+$/.test(header)) return;
+
+    let chName = header;
+    if (wordsByChapter[chName]) {
+      chName = `${header} (${idx})`;
+    }
+
+    chapters.push(chName);
+    wordsByChapter[chName] = [];
+
+    dataRows.forEach(row => {
+      if (!row || !row.c) return;
+      const cell = row.c[idx];
+      if (cell && (cell.v != null || cell.f != null)) {
+        let rawVal = (cell.v != null) ? cell.v : cell.f;
+        let val = String(rawVal).trim();
+        if (val && !/^\d+$/.test(val)) {
+          wordsByChapter[chName].push(val);
+        }
+      }
+    });
+  });
+
+  return { chapters, wordsByChapter };
+}
+
+function loadSampleMockDatabase() {
+  loadedSheetsData['P.1'] = {
+    chapters: ['第一章', '第二章', '第三章', '第四章'],
+    wordsByChapter: {
+      '第一章': ['早上', '中午', '晚上', '太陽', '月亮', '星星', '白雲', '藍天'],
+      '第二章': ['學校', '老師', '學生', '朋友', '同學', '校長', '班長', '文具'],
+      '第三章': ['走', '跑', '跳', '飛', '游', '爬', '滾', '看', '聽', '說'],
+      '第四章': ['我愛我的家人。', '今天天氣真好。', '我和朋友一起玩。', '媽媽煮飯很好吃。']
+    }
+  };
+
+  loadedSheetsData['P.2'] = {
+    chapters: ['第一章', '第二章', '第三章', '第四章'],
+    wordsByChapter: {
+      '第一章': ['晴天', '陰天', '颳風', '下雨', '下雪', '打雷', '閃電', '彩虹'],
+      '第二章': ['開心', '快樂', '高興', '興奮', '有趣', '歡樂', '微笑', '難過'],
+      '第三章': ['刷牙', '洗臉', '洗澡', '穿衣', '吃飯', '上學', '回家', '睡覺'],
+      '第四章': ['春天來了，花兒開了。', '我們一起去公園玩。', '這本書很有趣。', '小朋友要愛護動物。']
+    }
+  };
+
+  loadedSheetsData['P.3'] = {
+    chapters: ['第一章', '第二章', '第三章', '第四章'],
+    wordsByChapter: {
+      '第一章': ['英雄', '勇敢', '善良', '誠實', '守信', '孝順', '禮貌', '友愛'],
+      '第二章': ['社區', '鄰里', '環境', '自然', '生態', '保護', '節約', '回收'],
+      '第三章': ['因為', '所以', '但是', '如果', '而且', '雖然', '不過', '然後'],
+      '第四章': ['做人要誠實守信。', '我們要保護環境。', '努力學習才能實現夢想。', '運動對健康很重要。']
+    }
+  };
+
+  loadedSheetsData['P.4'] = {
+    chapters: ['第一章', '第二章', '第三章', '第四章'],
+    wordsByChapter: {
+      '第一章': ['智慧', '經驗', '知識', '道理', '原則', '觀念', '想法', '意見'],
+      '第二章': ['語文', '數學', '常識', '音樂', '體育', '美術', '科目', '課程'],
+      '第三章': ['宇宙', '星球', '太陽系', '地球', '月球', '引力', '重力', '能源'],
+      '第四章': ['中國傳統文化博大精深。', '遇到挑戰要堅持不懈。', '大自然充滿了奧秘。']
+    }
+  };
+
+  loadedSheetsData['P.5'] = {
+    chapters: ['第一章', '第二章', '第三章', '第四章'],
+    wordsByChapter: {
+      '第一章': ['品格', '修養', '情操', '氣質', '風度', '胸襟', '奮鬥', '拼搏'],
+      '第二章': ['溝通', '交流', '表達', '陳述', '討論', '辯論', '說服', '合作'],
+      '第三章': ['全球化', '國際', '世界', '地球', '區域', '本土', '多元', '科技'],
+      '第四章': ['科技的發展改變了世界。', '良好的溝通是合作的基礎。', '團隊合作才能達到最佳成果。']
+    }
+  };
+
+  loadedSheetsData['P.6'] = {
+    chapters: ['第一章', '第二章', '第三章', '第四章'],
+    wordsByChapter: {
+      '第一章': ['領袖', '領導', '管理', '決策', '指揮', '帶領', '典範', '榜樣'],
+      '第二章': ['承擔', '負責', '肩負', '履行', '執行', '完成', '實踐', '貢獻'],
+      '第三章': ['哲學', '思想', '智慧', '學問', '理論', '學術', '傳統', '精髓'],
+      '第四章': ['法治是社會穩定的基石。', '領袖應該有遠見和胸襟。', '和平與發展是時代的主題。']
+    }
+  };
+}
+
+async function discoverAndLoadSheet(sheetId) {
+  currentSpreadsheetId = sheetId;
+  loadedSheetsData = {};
+
+  const gradeSelect = document.getElementById('gradeSelect');
+  const chapterSelect = document.getElementById('chapterSelect');
+  const badge = document.getElementById('sheetStatusBadge');
+  const errBox = document.getElementById('sheetErrorMessage');
+  
+  if (badge) { badge.textContent = _('連線試算表...'); badge.style.background = '#e8f0fe'; badge.style.color = '#667eea'; }
+  if (errBox) { errBox.style.display = 'none'; }
+  if (gradeSelect) { gradeSelect.innerHTML = `<option value="">${_('讀取年級中...')}</option>`; gradeSelect.disabled = true; }
+  if (chapterSelect) { chapterSelect.innerHTML = `<option value="">${_('請先選擇年級')}</option>`; chapterSelect.disabled = true; }
+
+  const pGrades = ['P.1', 'P.2', 'P.3', 'P.4', 'P.5', 'P.6'];
+  const probePromises = pGrades.map(async (tabName) => {
+    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}`;
+    try {
+      const res = await fetch(url);
+      if (res.ok) {
+        const text = await res.text();
+        const table = parseGvizResponse(text);
+        if (table && table.cols && table.cols.length > 0) {
+          const parsed = parseTableStructure(table);
+          if (parsed.chapters && parsed.chapters.length > 0) {
+            return { tabName, parsed };
+          }
+        }
+      }
+    } catch (e) {}
+    return null;
+  });
+
+  const results = await Promise.all(probePromises);
+  let anyFetched = false;
+  results.forEach(item => {
+    if (item && item.parsed) {
+      anyFetched = true;
+      loadedSheetsData[item.tabName] = item.parsed;
+    }
+  });
+
+  if (!anyFetched) {
+    if (badge) { badge.textContent = _('示範題庫模式'); badge.style.background = '#fef3c7'; badge.style.color = '#d97706'; }
+    if (errBox) {
+      errBox.style.display = 'block';
+      errBox.innerHTML = `<b>${_('無法讀取雲端試算表')} (ID: <code>${escHtml(sheetId)}</code>)</b><br>` +
+        `${_('原因：試算表未公開存取權限，或網路連線受限。')}<br>` +
+        `${_('解法：請於 Google 試算表點選「共用」並將權限設為「知道連結的任何人均可查看」。')}<br>` +
+        `<hr style="margin:8px 0;border:none;border-top:1px dashed #feb2b2">` +
+        `<b>${_('系統已自動啟用「示範題庫」')}</b>${_('，供您立即體驗各年級章節連動及測驗功能。')}`;
+    }
+    loadSampleMockDatabase();
+  } else {
+    loadSampleMockDatabase();
+    results.forEach(item => {
+      if (item && item.parsed) {
+        loadedSheetsData[item.tabName] = item.parsed;
+      }
+    });
+    if (badge) { badge.textContent = _('雲端連線成功'); badge.style.background = '#d1fae5'; badge.style.color = '#065f46'; }
+  }
+
+  renderGradeSelect();
+  gradeSelect.value = 'P.1';
+  onGradeSelected();
+}
+
+function renderGradeSelect() {
+  const gradeSelect = document.getElementById('gradeSelect');
+  if (!gradeSelect) return;
+  gradeSelect.innerHTML = REQUIRED_GRADES.map(tab => {
+    const label = convertText(tab);
+    return `<option value="${escHtml(tab)}">${escHtml(label)}</option>`;
+  }).join('');
+  gradeSelect.disabled = false;
+}
+
+function getCustomLists() {
+  try { return JSON.parse(localStorage.getItem('zhDictCustomLists') || '[]'); } catch(e) { return []; }
+}
+
+function saveCustomListsToStorage(lists) {
+  try { localStorage.setItem('zhDictCustomLists', JSON.stringify(lists)); } catch(e) {}
+}
+
+function saveCustomListPrompt() {
+  const text = document.getElementById('wordInput').value.trim();
+  if (!text) { showModal(_('清單為空'), _('請先輸入詞語或句子再點選儲存。')); return; }
+  const lines = text.split('\n').map(s => convertText(s.trim())).filter(Boolean);
+  if (lines.length === 0) { showModal(_('清單為空'), _('請先輸入詞語或句子再點選儲存。')); return; }
+
+  showPromptModal(_('請輸入自訂清單名稱：'), '', (name) => {
+    if (!name || !name.trim()) return;
+    const lists = getCustomLists();
+    lists.unshift({ name: name.trim(), items: lines, savedAt: Date.now() });
+    saveCustomListsToStorage(lists);
+
+    const curGrade = document.getElementById('gradeSelect').value;
+    if (curGrade === '自訂列表') {
+      onGradeSelected();
+    } else {
+      showModal(_('儲存成功'), `已成功儲存清單「${name.trim()}」。您隨時可於年級選單切換至「自訂列表」載入。`);
+    }
+  });
+}
+
+function deleteCustomList(idx) {
+  showConfirmModal(_('確定要刪除此自訂清單？'), () => {
+    const lists = getCustomLists();
+    lists.splice(idx, 1);
+    saveCustomListsToStorage(lists);
+    onGradeSelected();
+  });
+}
+
+function onGradeSelected() {
+  const gradeSelect = document.getElementById('gradeSelect');
+  const chapterSelect = document.getElementById('chapterSelect');
+  const infoEl = document.getElementById('loadedWordsInfo');
+  
+  if (!gradeSelect || !chapterSelect) return;
+  const grade = gradeSelect.value;
+
+  if (grade === '自訂列表') {
+    const lists = getCustomLists();
+    if (lists.length === 0) {
+      chapterSelect.innerHTML = `<option value="">-- ${_('暫無自訂清單，請於下方輸入並點選儲存')} --</option>`;
+      chapterSelect.disabled = true;
+      if (infoEl) infoEl.textContent = _('尚無自訂清單');
+      document.getElementById('wordInput').value = '';
+    } else {
+      chapterSelect.innerHTML = lists.map((l, i) => {
+        return `<option value="${i}">${escHtml(convertText(l.name))} (${l.items.length} ${_('項')})</option>`;
+      }).join('');
+      chapterSelect.disabled = false;
+      onChapterSelected();
+    }
+    return;
+  }
+
+  const gradeData = loadedSheetsData[grade];
+  if (!grade || !gradeData) {
+    chapterSelect.innerHTML = `<option value="">-- ${_('此年級暫無章節')} --</option>`;
+    chapterSelect.disabled = true;
+    if (infoEl) infoEl.textContent = _('尚未載入詞語');
+    return;
+  }
+
+  const chapters = gradeData.chapters || [];
+  let optionsHtml = chapters.map(chName => {
+    const wordList = gradeData.wordsByChapter[chName] || [];
+    const chLabel = convertText(chName);
+    return `<option value="${escHtml(chName)}">${escHtml(chLabel)} (${wordList.length} ${_('詞')})</option>`;
+  }).join('');
+
+  if (chapters.length > 1) {
+    const totalWords = chapters.reduce((sum, ch) => sum + (gradeData.wordsByChapter[ch] || []).length, 0);
+    optionsHtml = `<option value="__ALL__">${_('全部章節匯總')} (${totalWords} ${_('詞')})</option>` + optionsHtml;
+  }
+
+  chapterSelect.innerHTML = optionsHtml;
+  chapterSelect.disabled = chapters.length === 0;
+
+  if (chapters.length > 0) {
+    chapterSelect.value = chapters[0];
+  }
+  onChapterSelected();
+}
+
+function onChapterSelected() {
+  const gradeSelect = document.getElementById('gradeSelect');
+  const chapterSelect = document.getElementById('chapterSelect');
+  const wordInput = document.getElementById('wordInput');
+  const infoEl = document.getElementById('loadedWordsInfo');
+
+  if (!gradeSelect || !chapterSelect || !wordInput) return;
+  const grade = gradeSelect.value;
+  const ch = chapterSelect.value;
+
+  if (!grade || ch === '') return;
+
+  if (grade === '自訂列表') {
+    const lists = getCustomLists();
+    const listObj = lists[Number(ch)];
+    if (listObj) {
+      wordInput.value = listObj.items.map(t => convertText(t)).join('\n');
+      if (infoEl) {
+        infoEl.innerHTML = `已載入自訂清單 [${escHtml(convertText(listObj.name))}] 共 ${listObj.items.length} 項詞句 ` +
+          `<button onclick="deleteCustomList(${Number(ch)})" style="background:none;border:none;color:#e74c3c;text-decoration:underline;cursor:pointer;margin-left:8px;font-weight:700">刪除清單</button>`;
+      }
+    }
+    return;
+  }
+
+  const gradeData = loadedSheetsData[grade];
+  if (!gradeData) return;
+
+  let words = [];
+  let chDisplayName = '';
+  if (ch === '__ALL__') {
+    (gradeData.chapters || []).forEach(cName => {
+      words.push(...(gradeData.wordsByChapter[cName] || []));
+    });
+    chDisplayName = _('全部章節匯總');
+  } else {
+    words = gradeData.wordsByChapter[ch] || [];
+    chDisplayName = convertText(ch);
+  }
+
+  const convertedWords = words.map(w => convertText(w));
+  wordInput.value = convertedWords.join('\n');
+
+  if (infoEl) {
+    infoEl.textContent = `已載入 [${convertText(grade)} - ${chDisplayName}] 共 ${words.length} 項詞句`;
+  }
+}
+
+function showConfigPrompt() {
+  showPromptModal(
+    _('請輸入學校試算表 ID：'),
+    currentSpreadsheetId,
+    (newId) => {
+      if (newId && newId.trim()) {
+        const cleanId = newId.trim();
+        const newUrl = window.location.pathname + '?id=' + encodeURIComponent(cleanId);
+        window.history.pushState({ path: newUrl }, '', newUrl);
+        discoverAndLoadSheet(cleanId);
+      }
+    }
+  );
+}
+
+// ====== CHAR DATA (dictionary) ======
+const CHAR_DATA = {
+'人':{p:'rén',j:'jan4',s:2,r:'人'},'大':{p:'dà',j:'daai6',s:3,r:'大'},'小':{p:'xiǎo',j:'siu2',s:3,r:'小'},
+'上':{p:'shàng',j:'soeng5',s:3,r:'一'},'下':{p:'xià',j:'haa6',s:3,r:'一'},'山':{p:'shān',j:'saan1',s:3,r:'山'},
+'水':{p:'shuǐ',j:'seoi2',s:4,r:'水'},'火':{p:'huǒ',j:'fo2',s:4,r:'火'},'日':{p:'rì',j:'jat6',s:4,r:'日'},
+'月':{p:'yuè',j:'jyut6',s:4,r:'月'},'天':{p:'tiān',j:'tin1',s:4,r:'大'},'地':{p:'dì',j:'dei6',s:6,r:'土'},
+'花':{p:'huā',j:'faa1',s:7,r:'艹'},'草':{p:'cǎo',j:'cou2',s:9,r:'艹'},'木':{p:'mù',j:'muk6',s:4,r:'木'},
+'鳥':{p:'niǎo',j:'niu5',s:11,r:'鳥'},'鱼':{p:'yú',j:'jyu4',s:8,r:'鱼'},'马':{p:'mǎ',j:'maa5',s:3,r:'马'},
+'牛':{p:'niú',j:'ngau4',s:4,r:'牛'},'羊':{p:'yáng',j:'joeng4',s:6,r:'羊'},'學':{p:'xué',j:'hok6',s:16,r:'子'},
+'学':{p:'xué',j:'hok6',s:8,r:'子'},'校':{p:'xiào',j:'haau6',s:10,r:'木'},'老':{p:'lǎo',j:'lou5',s:6,r:'老'},
+'師':{p:'shī',j:'si1',s:10,r:'巾'},'师':{p:'shī',j:'si1',s:6,r:'巾'},'生':{p:'shēng',j:'saang1',s:5,r:'生'},
+'朋':{p:'péng',j:'pang4',s:8,r:'月'},'友':{p:'yǒu',j:'jau5',s:4,r:'又'},'爸':{p:'bà',j:'baa1',s:8,r:'父'},
+'媽':{p:'mā',j:'maa1',s:13,r:'女'},'妈':{p:'mā',j:'maa1',s:6,r:'女'},'哥':{p:'gē',j:'go1',s:10,r:'口'},
+'姐':{p:'jiě',j:'ze2',s:8,r:'女'},'弟':{p:'dì',j:'dai6',s:7,r:'弓'},'妹':{p:'mèi',j:'mui6',s:8,r:'女'},
+'我':{p:'wǒ',j:'ngo5',s:7,r:'戈'},'愛':{p:'ài',j:'oi3',s:13,r:'心'},'爱':{p:'ài',j:'oi3',s:10,r:'爫'},
+'家':{p:'jiā',j:'gaa1',s:10,r:'宀'},'今':{p:'jīn',j:'gam1',s:4,r:'人'},'氣':{p:'qì',j:'hei3',s:10,r:'气'},
+'气':{p:'qì',j:'hei3',s:4,r:'气'},'真':{p:'zhēn',j:'zan1',s:10,r:'目'},'好':{p:'hǎo',j:'hou2',s:6,r:'女'},
+'喜':{p:'xǐ',j:'hei2',s:12,r:'口'},'歡':{p:'huān',j:'fun1',s:14,r:'欠'},'欢':{p:'huān',j:'fun1',s:6,r:'欠'},
+'吃':{p:'chī',j:'hek3',s:6,r:'口'},'和':{p:'hé',j:'wo4',s:8,r:'口'},'去':{p:'qù',j:'heoi3',s:5,r:'土'},
+'帶':{p:'dài',j:'daai3',s:11,r:'巾'},'带':{p:'dài',j:'daai3',s:9,r:'巾'},'公':{p:'gōng',j:'gung1',s:4,r:'八'},
+'園':{p:'yuán',j:'jyun4',s:13,r:'囗'},'园':{p:'yuán',j:'jyun4',s:7,r:'囗'},'書':{p:'shū',j:'syu1',s:10,r:'曰'},
+'书':{p:'shū',j:'syu1',s:4,r:'丨'},'包':{p:'bāo',j:'baau1',s:5,r:'勹'},'重':{p:'zhòng',j:'cung4',s:9,r:'里'},
+'美':{p:'měi',j:'mei5',s:9,r:'羊'},'麗':{p:'lì',j:'lai6',s:19,r:'鹿'},'丽':{p:'lì',j:'lai6',s:7,r:'丶'},
+'可':{p:'kě',j:'ho2',s:5,r:'口'},'動':{p:'dòng',j:'dung6',s:11,r:'力'},'动':{p:'dòng',j:'dung6',s:6,r:'力'},
+'物':{p:'wù',j:'mat6',s:8,r:'牛'},'森':{p:'sēn',j:'sam1',s:12,r:'木'},'林':{p:'lín',j:'lam4',s:8,r:'木'},
+'早':{p:'zǎo',j:'zou2',s:6,r:'日'},'春':{p:'chūn',j:'ceon1',s:9,r:'日'},'夏':{p:'xià',j:'haa6',s:10,r:'夂'},
+'秋':{p:'qiū',j:'cau1',s:9,r:'禾'},'冬':{p:'dōng',j:'dung1',s:5,r:'冫'}
+};
+
+// ====== CHINESE CONVERSION (Traditional <-> Simplified) ======
+const T2S = {
+  '個':'个','號':'号','丟':'丢','並':'并','么':'么','乾':'干','亂':'乱','亙':'亘','亞':'亚','佇':'伫','佈':'布','併':'并','侖':'仑','侶':'侣','侷':'局','俁':'俣','係':'系','俔':'伣','俠':'侠','俱':'俱','們':'们','倫':'伦','偉':'伟','側':'侧','偵':'侦','偽':'伪','傑':'杰','傘':'伞','傢':'家','傭':'佣','債':'债','傷':'伤','傾':'倾','僅':'仅','像':'像','僑':'侨','儀':'仪','億':'亿','儉':'俭','優':'优','兒':'儿','內':'内','兩':'两','冊':'册','凍':'冻','凜':'凛','凱':'凯','別':'别','則':'则','剛':'刚','劇':'剧','劉':'刘','劍':'剑','劑':'剂','勁':'劲','務':'务','勞':'劳','勢':'势','勵':'励','勸':'劝','勻':'匀','協':'协','卻':'却','厭':'厌','厲':'厉','參':'参','叢':'丛','吳':'吴','吶':'呐','呂':'吕','啟':'启','喚':'唤','喪':'丧','單':'单','喲':'哟','嗎':'吗','嗚':'呜','嘆':'叹','嘩':'哗','嘮':'唠','嘯':'啸','惡':'恶','噓':'嘘','噴':'喷','噸':'吨','嚇':'吓','嚕':'噜','嚥':'咽','囈':'呓','囉':'啰','蘇':'苏','囑':'嘱','園':'园','圍':'围','場':'场','報':'报','塗':'涂','塵':'尘','墊':'垫','墜':'坠','墮':'堕','墳':'坟','牆':'墙','墾':'垦','壇':'坛','壓':'压','壘':'垒','壞':'坏','壟':'垄','壩':'坝','壯':'壮','壽':'寿','夠':'够','夥':'伙','夾':'夹','奧':'奥','奪':'夺','獎':'奖','妝':'妆','婦':'妇','媽':'妈','嫺':'娴','嫻':'娴','嬌':'娇','嬰':'婴','宮':'宫','寢':'寝','寧':'宁','審':'审','寬':'宽','寵':'宠','寶':'宝','將':'将','專':'专','尋':'寻','尷':'尴','屆':'届','屢':'屡','屬':'属','岡':'冈','島':'岛','峽':'峡','崗':'岗','嶺':'岭','嶼':'屿','嶽':'岳','帥':'帅','帳':'帐','帶':'带','幀':'帧','幫':'帮','常':'常','幹':'干','平':'平','年':'年','幸':'幸','幾':'几','庫':'库','廚':'厨','廳':'厅','張':'张','強':'强','彈':'弹','歸':'归','當':'当','錄':'录','徹':'彻','徵':'征','徑':'径','從':'从','復':'复','複':'复','術':'术','衛':'卫','衝':'冲','裝':'装','補':'补','褲':'裤','裡':'里','製':'制','視':'视','規':'规','覓':'觅','覺':'觉','覽':'览','觀':'观','角':'角','解':'解','觸':'触','言':'言','訂':'订','計':'计','訊':'讯','討':'讨','記':'记','託':'托','訓':'训','訝':'讶','訪':'访','設':'设','許':'许','訴':'诉','診':'诊','詞':'词','譯':'译','議':'议','護':'护','讀':'读','變':'变','讓':'让','認':'认','語':'语','誠':'诚','說':'说','請':'请','諾':'诺','課':'课','誰':'谁','調':'调','諒':'谅','論':'论','談':'谈','誼':'谊','謀':'谋','謙':'谦','講':'讲','謝':'谢','謠':'谣','謹':'谨','謬':'谬','譁':'哗','譜':'谱','識':'识','讚':'赞','贏':'赢','赤':'赤','走':'走','起':'起','越':'越','趨':'趋','超':'超','趕':'赶','趙':'赵','趣':'趣','聽':'听','測':'测','儲':'储','載':'载','預':'预','備':'备','項':'项','頁':'页','刪':'删','確':'确','顯':'显','順':'顺','閉':'闭','暫':'暂','無':'无','詳':'详','細':'细','準':'准','匯':'汇','題':'题','雲':'云','連':'连','動':'动','庫':'库','學':'学','校':'校','選':'选','擇':'择','級':'级','章':'章','節':'节','更':'更','換':'换','新':'新','增':'增','訂':'订','端':'端','權':'权','網':'网','路':'路','整':'整','理':'理','匯':'汇','總':'总','與':'与','對':'对','實':'实','踐':'践','際':'際','隨':'随','機':'机','排':'排','序':'序','結':'结','果':'果','朗':'朗','清':'清','空':'空','復':'复','原':'原','筆':'笔','順':'顺','回':'回','到':'到','首':'首','條':'条','款':'款','版':'版','所':'所','支':'支','援':'援','動':'动','態':'态','參':'参','數':'数','連':'连','免':'免','責':'責','聲':'声','明':'明','本':'本','站':'站','僅':'仅','供':'供','教':'教','育':'育','考':'考','風':'风','險':'险','負':'负','關':'关','閉':'闭','根':'根','據':'据','指':'指','引':'引','資':'资','源':'源'
+};
+
+function toS(text) {
+  return [...text].map(c => T2S[c] || c).join('');
+}
+
+function convertText(text) { return isSimp() ? toS(text) : text; }
+function isSimp() { return state.lang === 'zh-CN'; }
+function isMan()  { return state.lang === 'zh-CN' || state.lang === 'zh-CN-T'; }
+
+function _(s) {
+  return isSimp() ? toS(s) : s;
+}
+
+function applyUILang() {
+  document.querySelectorAll('[data-t]').forEach(el => {
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') return;
+    el.textContent = _(el.dataset.t);
+  });
+  const pl = document.getElementById('wordInput');
+  if (pl && pl.dataset.t) pl.placeholder = _(pl.dataset.t);
+}
+
+// ====== UTILITIES ======
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ====== MODAL ======
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+});
+
+function showModal(title, msg) {
+  document.getElementById('modalOkBtn').style.display = 'inline-flex';
+  document.getElementById('modalConfirmActions').style.display = 'none';
+  document.getElementById('modalInput').style.display = 'none';
+  document.getElementById('modalTitle').textContent = _(title);
+  document.getElementById('modalMsg').textContent = _(msg);
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function showConfirmModal(msg, onConfirm) {
+  document.getElementById('modalOkBtn').style.display = 'none';
+  document.getElementById('modalInput').style.display = 'none';
+  document.getElementById('modalTitle').textContent = '';
+  document.getElementById('modalMsg').textContent = _(msg);
+  const actions = document.getElementById('modalConfirmActions');
+  actions.style.display = 'flex';
+  actions.innerHTML =
+    `<button class="btn btn-outline" id="modalNoBtn">${_('取消')}</button>` +
+    `<button class="btn btn-primary" id="modalYesBtn">${_('確定')}</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.getElementById('modalYesBtn').onclick = () => { closeModal(); onConfirm(); };
+  document.getElementById('modalNoBtn').onclick = closeModal;
+}
+
+function showPromptModal(msg, defaultValue, onSubmit) {
+  document.getElementById('modalOkBtn').style.display = 'none';
+  document.getElementById('modalConfirmActions').style.display = 'none';
+  document.getElementById('modalTitle').textContent = '';
+  document.getElementById('modalMsg').textContent = _(msg);
+  const input = document.getElementById('modalInput');
+  input.style.display = 'block';
+  input.value = defaultValue || '';
+  input.onkeydown = e => { if (e.key === 'Enter') { closeModal(); onSubmit(input.value); } };
+  const actions = document.getElementById('modalConfirmActions');
+  actions.style.display = 'flex';
+  actions.innerHTML =
+    `<button class="btn btn-outline" id="modalPromptCancelBtn">${_('取消')}</button>` +
+    `<button class="btn btn-primary" id="modalPromptOkBtn">${_('確定')}</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.getElementById('modalPromptOkBtn').onclick = () => { closeModal(); onSubmit(input.value); };
+  document.getElementById('modalPromptCancelBtn').onclick = closeModal;
+  setTimeout(() => input.focus(), 100);
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+// ====== LANGUAGE TOGGLE ======
+function setLanguage(lang) {
+  if (lang === state.lang) return;
+  state.lang = lang;
+  document.querySelectorAll('.lang-opt').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  const ta = document.getElementById('wordInput');
+  if (ta && ta.value) ta.value = convertText(ta.value);
+  applyUILang();
+  
+  const curGrade = document.getElementById('gradeSelect') ? document.getElementById('gradeSelect').value : '';
+  renderGradeSelect();
+  if (curGrade) {
+    document.getElementById('gradeSelect').value = curGrade;
+    onGradeSelected();
+  }
+}
+
+function isCJK(c) { return c >= '\u4e00' && c <= '\u9fff'; }
+const CJK_PUNCT = new Set('。，！？、；：「」『』【】《》—…·・,.:;!?()（）""\'\'');
+function stripNonChinese(s) {
+  return [...s].filter(c => isCJK(c) || CJK_PUNCT.has(c)).join('');
+}
+function onlyChinese(s) {
+  return [...s].filter(c => isCJK(c) || CJK_PUNCT.has(c)).join('');
+}
+
+function updateShuffleBtn() {
+  const btn = document.getElementById('shuffleToggle');
+  if (!btn) return;
+  if (state.shuffle) {
+    btn.style.background = '#667eea';
+    btn.style.borderColor = '#667eea';
+    btn.style.color = '#fff';
+  } else {
+    btn.style.background = 'transparent';
+    btn.style.borderColor = '#cbd5e0';
+    btn.style.color = '#4a5568';
+  }
+}
+
+function toggleShuffle() {
+  state.shuffle = !state.shuffle;
+  updateShuffleBtn();
+}
+
+function startDictation() {
+  const text = document.getElementById('wordInput').value.trim();
+  if (!text) {
+    showModal(_('清單為空'), _('請輸入要默寫的詞語或句子。'));
+    return;
+  }
+  const rawItems = text.split(/[。，！？、；：「」『』【】《》—…·・,.:;!?()（）""\'\'\n\r\t ]+/);
+  const items = rawItems.map(s => s.trim()).filter(Boolean);
+  if (items.length === 0) {
+    showModal(_('清單為空'), _('請輸入要默寫的詞語或句子。'));
+    return;
+  }
+
+  const mapped = items.map((t, i) => {
+    t = stripNonChinese(t);
+    return {
+      text: t,
+      index: i,
+    };
+  }).filter(it => it.text.length > 0);
+
+  if (state.shuffle) shuffle(mapped);
+  state.session = {
+    items: mapped,
+    currentIndex: 0,
+  };
+
+  state.canvasStates = [];
+  document.getElementById('flipCard').classList.remove('flipped');
+  showScreen('screen-dictation');
+  showItem(0);
+}
+
+// ====== DICTATION ITEM ======
+function showItem(index) {
+  const session = state.session;
+  if (!session || index >= session.items.length) {
+    showResults();
+    return;
+  }
+
+  stopTestTimer();
+  document.getElementById('dictTimer').style.display = 'none';
+
+  const item = session.items[index];
+  session.currentIndex = index;
+  document.getElementById('dictProgress').textContent = `${index + 1} / ${session.items.length}`;
+
+  document.getElementById('flipCard').classList.remove('flipped');
+  document.getElementById('flipFrontChar').textContent = item.text;
+  const isLong = item.text.length >= 5;
+  document.getElementById('flipFrontHint').textContent = isLong ? _('句子') : _('詞語');
+  document.getElementById('flipCard').scrollIntoView({ block: 'start', behavior: 'smooth' });
+
+  buildCanvasGrid(item.text, document.getElementById('flipCanvasGrid'));
+}
+
+function flipCard() {
+  document.getElementById('flipCard').classList.add('flipped');
+  const item = state.session.items[state.session.currentIndex];
+  if (item) {
+    startTestTimer(item.text);
+    speakCurrent();
+  }
+}
+
+// ====== TTS ======
+let _ttsAudio = null;
+
+function speakCurrent() {
+  const session = state.session;
+  if (!session || !session.items.length) return;
+  const text = session.items[session.currentIndex].text;
+  if (!text) return;
+
+  if (_ttsAudio) { try { _ttsAudio.pause(); } catch(e) {} _ttsAudio = null; }
+
+  const mandarin = isMan();
+  const dbg = document.getElementById('ttsDebug');
+
+  const tl = mandarin ? 'zh-CN' : 'yue';
+  const label = mandarin ? '普通話發音' : '粵語發音';
+  const cleaned = onlyChinese(text);
+  if (!cleaned) { if (dbg) dbg.textContent = '無中文字可朗讀'; return; }
+  const ttsText = mandarin ? toS(cleaned) : cleaned;
+  const audio = new Audio();
+  audio.referrerPolicy = 'no-referrer';
+  audio.src = 'https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=' + tl + '&q=' + encodeURIComponent(ttsText) + '&client=gtx';
+  _ttsAudio = audio;
+  audio.onended = () => { _ttsAudio = null; };
+  audio.play().then(() => {
+    if (dbg) { dbg.textContent = label; setTimeout(() => { dbg.textContent = ''; }, 3000); }
+  }).catch(() => {
+    if (dbg) dbg.textContent = '語音播放受限';
+  });
+}
+
+// ====== BUILD CANVAS GRID ======
+function buildCanvasGrid(text, gridEl) {
+  const chars = [...text];
+  gridEl.innerHTML = '';
+  state.canvasStates = [];
+
+  const isLong = chars.length >= 5;
+  gridEl.style.maxWidth = isLong ? '900px' : '100%';
+
+  chars.forEach((char, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'tianzige-wrap';
+    wrap.dataset.index = i;
+
+    const canvas = document.createElement('canvas');
+    canvas.className = 'tianzige-canvas';
+    canvas.dataset.index = i;
+    canvas.width = CANVAS_SIZE;
+    canvas.height = CANVAS_SIZE;
+
+    wrap.appendChild(canvas);
+    gridEl.appendChild(wrap);
+
+    const cs = {
+      canvas,
+      ctx: canvas.getContext('2d'),
+      strokes: [],
+      currentStroke: null,
+      isDrawing: false,
+      char,
+      submitted: false,
+    };
+    state.canvasStates.push(cs);
+    drawTianZiGe(cs.ctx, CANVAS_SIZE, CANVAS_SIZE);
+    bindCanvasEvents(cs, canvas);
+  });
+}
+
+// ====== CANVAS DRAWING ======
+function drawTianZiGe(ctx, w, h) {
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.strokeStyle = '#d0d0e0';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([]);
+  ctx.strokeRect(2, 2, w - 4, h - 4);
+
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(w / 2, 2);
+  ctx.lineTo(w / 2, h - 2);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(2, h / 2);
+  ctx.lineTo(w - 2, h / 2);
+  ctx.stroke();
+
+  ctx.setLineDash([2, 6]);
+  ctx.strokeStyle = '#e0e0f0';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(2, 2);
+  ctx.lineTo(w - 2, h - 2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(w - 2, 2);
+  ctx.lineTo(2, h - 2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function redrawCanvas(cs) {
+  const { ctx, canvas, strokes } = cs;
+  const size = canvas.width;
+  drawTianZiGe(ctx, size, size);
+
+  ctx.strokeStyle = '#333';
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  strokes.forEach(points => {
+    if (points.length < 2) return;
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length - 1; i++) {
+      const xc = (points[i].x + points[i + 1].x) / 2;
+      const yc = (points[i].y + points[i + 1].y) / 2;
+      ctx.quadraticCurveTo(points[i].x, points[i].y, xc, yc);
+    }
+    ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
+    ctx.stroke();
+  });
+}
+
+function bindCanvasEvents(cs, canvas) {
+  const getPos = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+    const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    return { x: x * scaleX, y: y * scaleY };
+  };
+
+  const startDraw = (e) => {
+    if (cs.submitted) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    cs.isDrawing = true;
+    cs.currentStroke = [pos];
+    cs.strokes.push(cs.currentStroke);
+  };
+
+  const moveDraw = (e) => {
+    if (!cs.isDrawing || cs.submitted) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    cs.currentStroke.push(pos);
+    redrawCanvas(cs);
+  };
+
+  const endDraw = () => {
+    if (!cs.isDrawing) return;
+    cs.isDrawing = false;
+    cs.currentStroke = null;
+  };
+
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', moveDraw);
+  canvas.addEventListener('mouseup', endDraw);
+  canvas.addEventListener('mouseleave', endDraw);
+  canvas.addEventListener('touchstart', startDraw, { passive: false });
+  canvas.addEventListener('touchmove', moveDraw, { passive: false });
+  canvas.addEventListener('touchend', endDraw, { passive: false });
+}
+
+function clearAllCanvas() {
+  state.canvasStates.forEach(cs => {
+    cs.strokes = [];
+    cs.currentStroke = null;
+    cs.submitted = false;
+    cs.canvas.style.opacity = '1';
+    redrawCanvas(cs);
+  });
+}
+
+function undoLastStroke() {
+  for (let i = state.canvasStates.length - 1; i >= 0; i--) {
+    const cs = state.canvasStates[i];
+    if (cs.strokes.length > 0) {
+      cs.strokes.pop();
+      redrawCanvas(cs);
+      return;
+    }
+  }
+}
+
+// ====== TIMER ======
+function startTestTimer(text) {
+  stopTestTimer();
+  const timePerChar = Math.max(TEST_TIME_PER_CHAR_MS, 10000);
+  const totalTime = Math.max(text.length * timePerChar, TEST_MIN_TIME_MS);
+  state.testTimeLeft = Math.ceil(totalTime / 1000);
+
+  const timerEl = document.getElementById('dictTimer');
+  timerEl.style.display = 'block';
+  timerEl.classList.remove('timer-critical');
+  updateTimerDisplay();
+
+  state.testTimer = setInterval(() => {
+    state.testTimeLeft--;
+    updateTimerDisplay();
+    if (state.testTimeLeft <= 5) timerEl.classList.add('timer-critical');
+    if (state.testTimeLeft <= 0) {
+      clearInterval(state.testTimer);
+      state.testTimer = null;
+      nextItem();
+    }
+  }, 1000);
+}
+
+function stopTestTimer() {
+  if (state.testTimer) {
+    clearInterval(state.testTimer);
+    state.testTimer = null;
+  }
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(state.testTimeLeft / 60);
+  const s = state.testTimeLeft % 60;
+  document.getElementById('dictTimer').textContent = `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+// ====== NEXT ITEM ======
+function nextItem() {
+  const session = state.session;
+  if (!session) return;
+
+  state.canvasStates.forEach(cs => { cs.submitted = true; });
+
+  const item = session.items[session.currentIndex];
+  item.canvasImages = state.canvasStates.map(cs => cs.canvas.toDataURL());
+
+  stopTestTimer();
+  cleanupHW();
+
+  state.canvasStates.forEach(cs => {
+    cs.submitted = false;
+    cs.strokes = [];
+    cs.currentStroke = null;
+  });
+
+  const nextIndex = session.currentIndex + 1;
+  if (nextIndex >= session.items.length) {
+    showResults();
+  } else {
+    document.getElementById('flipCard').classList.remove('flipped');
+    showItem(nextIndex);
+  }
+}
+
+// ====== STROKE ORDER ======
+function showStrokeOrder(el, char, idx) {
+  const existing = document.getElementById('hwPopup');
+  if (existing) { closeHWPopup(); return; }
+
+  const popup = document.createElement('div');
+  popup.id = 'hwPopup';
+  popup.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:18px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.25);z-index:2000;text-align:center';
+
+  popup.innerHTML = `<div style="font-size:.95em;color:#4a5568;margin-bottom:12px;font-weight:700">${escHtml(char)} ${_('筆順動畫')}</div>
+    <div id="hwCell" style="width:140px;height:140px;margin:0 auto"></div>
+    <button class="btn btn-sm btn-outline" onclick="closeHWPopup()" style="margin-top:16px;padding:6px 24px">${_('關閉')}</button>
+    <div style="margin-top:12px;font-size:.75em;color:#a0aec0">${_('筆順根據教育局學習字詞表指引')}</div>`;
+
+  document.body.appendChild(popup);
+
+  if (typeof HanziWriter !== 'undefined') {
+    try {
+      const writer = HanziWriter.create('hwCell', char, {
+        width: 140, height: 140, padding: 8,
+        strokeColor: '#2d3748', radicalColor: '#e74c3c',
+        showCharacter: false, strokeAnimationDuration: 400,
+        delayBetweenStrokes: 120,
+      });
+      if (!window._hwInstances) window._hwInstances = [];
+      window._hwInstances[idx] = writer;
+      setTimeout(() => writer.animateCharacter().catch(() => {}), 300);
+    } catch(e) {
+      document.getElementById('hwCell').textContent = char;
+    }
+  }
+
+  popup.addEventListener('click', e => { if (e.target === popup) closeHWPopup(); });
+}
+
+function closeHWPopup() {
+  if (window._hwInstances) {
+    window._hwInstances.forEach(w => { try { w && w.quit && w.quit(); } catch(e) {} });
+    window._hwInstances = [];
+  }
+  const popup = document.getElementById('hwPopup');
+  if (popup) popup.remove();
+}
+
+function cleanupHW() {
+  closeHWPopup();
+}
+
+// ====== RESULTS ======
+function showResults() {
+  stopTestTimer();
+  showScreen('screen-results');
+
+  const session = state.session;
+  const total = session.items.length;
+
+  document.getElementById('resultScoreNum').textContent = `${total} ${_('項')}`;
+  document.getElementById('resultScoreLabel').textContent = `${_('測驗完成')}`;
+
+  const detail = document.getElementById('resultDetail');
+  detail.innerHTML = `<div style="margin-bottom:10px;color:#718096;font-size:.95em;font-weight:700">${_('所有項目總覽：')}</div>` +
+    session.items.map((item, i) => {
+      const chars = [...item.text];
+      const images = item.canvasImages || [];
+      let canvasRow = '';
+      if (images.length) {
+        canvasRow = `<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0 0">`;
+        chars.forEach((ch, j) => {
+          const img = images[j];
+          if (img) {
+            canvasRow += `<div style="text-align:center;width:72px">
+              <img src="${img}" style="width:68px;height:68px;border-radius:8px;border:1px solid #cbd5e0;background:#fff;display:block">
+              <div style="font-size:.9em;font-weight:700;margin-top:4px;color:#2d3748">${escHtml(ch)}</div>
+              <button class="btn btn-outline btn-sm" style="margin-top:4px;font-size:.72em;padding:3px 8px;border-width:1px" onclick="showStrokeOrder(this, '${escHtml(ch)}', ${i*100+j})">${_('筆順')}</button>
+            </div>`;
+          }
+        });
+        canvasRow += `</div>`;
+      }
+      return `<div class="result-item" style="background:#f8f9fe;flex-direction:column;align-items:stretch;padding:14px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="result-icon">${i + 1}</span>
+          <span class="result-text">${escHtml(item.text)}</span>
+        </div>
+        ${canvasRow}
+      </div>`;
+    }).join('');
+
+  state.session = null;
+}
+
+function goSetup() {
+  stopTestTimer();
+  state.canvasStates = [];
+  showScreen('screen-setup');
+}
+
+function endDictation() {
+  showConfirmModal(_('確定結束測驗？'), () => {
+    stopTestTimer();
+    state.session = null;
+    state.canvasStates = [];
+    goSetup();
+  });
+}
+
+// ====== DICTIONARY POPUP ======
+document.getElementById('dictModalOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('dictModalOverlay')) closeDictModal();
+});
+
+function showCharDict(char) {
+  if (!char) return;
+  const data = CHAR_DATA[char];
+  const isCN = isMan();
+  const content = document.getElementById('dictModalContent');
+
+  if (!data) {
+    content.innerHTML = `<div style="text-align:center;padding:24px">
+      <div style="font-size:3.2em;font-weight:700;margin-bottom:12px;color:#2d3748">${escHtml(char)}</div>
+      <div style="color:#718096">${_('暫無詳細資料')}</div>
+      <div style="margin-top:16px;color:#a0aec0;font-size:.82em">${_('返回頁面點擊「筆順」查看筆順動畫')}</div>
+    </div>`;
+  } else {
+    const pron = isCN ? data.p : (data.j || data.p);
+    const pronLabel = isCN ? '普通話拼音' : '粵語拼音';
+    content.innerHTML = `
+      <div class="dict-header">
+        <div class="dict-char">${escHtml(char)}</div>
+        <div class="dict-pron">
+          <div><span class="label">${pronLabel}</span> ${pron}</div>
+          ${isCN && data.j ? `<div><span class="label">粵語拼音</span> ${data.j}</div>` : ''}
+          ${!isCN && data.p ? `<div><span class="label">普通話拼音</span> ${data.p}</div>` : ''}
+        </div>
+      </div>
+      <div class="dict-info">
+        <div class="dict-info-item">
+          <div class="val">${data.s || '?'}</div>
+          <div class="lbl">${_('筆畫')}</div>
+        </div>
+        <div class="dict-info-item">
+          <div class="val">${data.r || '?'}</div>
+          <div class="lbl">${_('部首')}</div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:16px;color:#a0aec0;font-size:.82em">${_('返回頁面點擊「筆順」查看筆順動畫')}</div>`;
+  }
+  document.getElementById('dictModalOverlay').classList.add('open');
+}
+
+function closeDictModal() {
+  document.getElementById('dictModalOverlay').classList.remove('open');
+}
+
+// ====== INIT ======
+function init() {
+  applyUILang();
+  const sheetId = getSpreadsheetIdFromUrl();
+  discoverAndLoadSheet(sheetId);
+
+  updateShuffleBtn();
+
+  document.getElementById('wordInput').addEventListener('input', function() {
+    if (!isSimp()) return;
+    const start = this.selectionStart;
+    const end = this.selectionEnd;
+    const converted = toS(this.value);
+    if (converted !== this.value) {
+      this.value = converted;
+      this.setSelectionRange(start, end);
+    }
+  });
+
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = function(){ window.speechSynthesis.getVoices(); };
+  }
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

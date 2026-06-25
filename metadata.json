@@ -1,0 +1,6 @@
+{
+  "name": "Chinese Dictation Multi-School Platform",
+  "description": "Multi-school Chinese dictation SPA dynamically fetching grade and chapter vocabulary from Google Sheets via URL parameter.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
