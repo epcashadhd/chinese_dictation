@@ -251,18 +251,8 @@ textarea:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.12)}
               <svg style="pointer-events: none" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
             </button>
             <div id="eraserMenu" style="display:none; position:absolute; bottom:100%; left:0; z-index:10; background:white; border:1px solid #cbd5e0; border-radius:8px; padding:8px; box-shadow:0 4px 6px rgba(0,0,0,0.1); white-space:nowrap;">
-              <div onclick="selectEraserSize(8)" style="width:16px; height:16px; border-radius:50%; background:#4a5568; display:inline-block; cursor:pointer; margin:4px;"></div>
-              <div onclick="selectEraserSize(24)" style="width:24px; height:24px; border-radius:50%; background:#4a5568; display:inline-block; cursor:pointer; margin:4px;"></div>
-            </div>
-          </div>
-          <div style="position:relative; display:inline-block">
-            <button class="btn btn-outline btn-sm" onclick="toggleSpeedMenu(); handleButtonClick(this);" title="筆順速度" id="speedBtn" style="padding: 4px;">
-              <svg style="pointer-events: none" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            </button>
-            <div id="speedMenu" style="display:none; position:absolute; bottom:100%; left:0; z-index:10; background:white; border:1px solid #cbd5e0; border-radius:8px; padding:8px; box-shadow:0 4px 6px rgba(0,0,0,0.1); white-space:nowrap;">
-              <div onclick="setStrokeSpeed(2.0)" style="cursor:pointer; padding:4px 8px; font-size:12px;">快</div>
-              <div onclick="setStrokeSpeed(1.0)" style="cursor:pointer; padding:4px 8px; font-size:12px;">中</div>
-              <div onclick="setStrokeSpeed(0.5)" style="cursor:pointer; padding:4px 8px; font-size:12px;">慢</div>
+              <div onclick="handleEraserSizeSelection(8, this)" style="width:16px; height:16px; border-radius:50%; background:#4a5568; display:inline-block; cursor:pointer; margin:4px; transition: transform 0.1s;"></div>
+              <div onclick="handleEraserSizeSelection(24, this)" style="width:24px; height:24px; border-radius:50%; background:#4a5568; display:inline-block; cursor:pointer; margin:4px; transition: transform 0.1s;"></div>
             </div>
           </div>
         </div>
@@ -346,6 +336,21 @@ function resetEraser() {
   }
 }
 
+function resetSpeed() {
+  state.strokeSpeed = 1.0;
+  const speedMenu = document.getElementById('speedMenu');
+  const speedBtn = document.getElementById('speedBtn');
+  if (speedMenu) {
+    speedMenu.style.display = 'none';
+  }
+  if (speedBtn) {
+    speedBtn.style.background = '#fff';
+    speedBtn.style.borderColor = '#cbd5e0';
+    speedBtn.style.color = '#4a5568';
+    speedBtn.title = '筆順速度';
+  }
+}
+
 function toggleEraser() {
   if (state.isEraser) {
     resetEraser();
@@ -353,6 +358,22 @@ function toggleEraser() {
     const menu = document.getElementById('eraserMenu');
     menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
   }
+}
+
+function toggleSpeedMenu() {
+  const menu = document.getElementById('speedMenu');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+function selectStrokeSpeed(speed) {
+  state.strokeSpeed = speed;
+  document.getElementById('speedMenu').style.display = 'none';
+  
+  const speedBtn = document.getElementById('speedBtn');
+  speedBtn.style.background = '#ebf4ff';
+  speedBtn.style.borderColor = '#667eea';
+  speedBtn.style.color = '#667eea';
+  speedBtn.title = `筆順速度 (速度: ${speed === 0.5 ? '快' : speed === 1.0 ? '中' : '慢'})`;
 }
 
 function selectEraserSize(size) {
@@ -1089,16 +1110,6 @@ function speakCurrent() {
 }
 
 // ====== BOX STROKE ORDER HELPER ======
-function setStrokeSpeed(speed) {
-  state.strokeSpeed = speed;
-  document.getElementById('speedMenu').style.display = 'none';
-}
-
-function toggleSpeedMenu() {
-  const menu = document.getElementById('speedMenu');
-  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-}
-
 function playBoxStrokeOrder(char, containerEl, size, btnEl = null) {
   if (typeof HanziWriter === 'undefined' || !char) return;
 
@@ -1130,9 +1141,8 @@ function playBoxStrokeOrder(char, containerEl, size, btnEl = null) {
     const writer = HanziWriter.create(containerEl, char, {
       width: size, height: size, padding: pad,
       strokeColor: '#e74c3c', radicalColor: '#c0392b',
-      showCharacter: false,
-      strokeAnimationDuration: Math.floor(380 / state.strokeSpeed),
-      delayBetweenStrokes: Math.floor(110 / state.strokeSpeed),
+      showCharacter: false, strokeAnimationDuration: 380 * state.strokeSpeed,
+      delayBetweenStrokes: 110 * state.strokeSpeed,
     });
     setTimeout(() => {
       if (writer && writer.animateCharacter) {
@@ -1267,15 +1277,43 @@ function buildCanvasGrid(text, gridEl, savedStrokes = null) {
     hintBtn.textContent = '💡 提示';
     hintBtn.title = '顯示香港小學字詞表標準正體提示';
 
+    const strokeWrapper = document.createElement('div');
+    strokeWrapper.style.cssText = 'position:relative;display:flex;flex:1';
+    
     const strokeBtn = document.createElement('button');
     strokeBtn.type = 'button';
     strokeBtn.className = 'btn btn-outline btn-sm';
     strokeBtn.style.cssText = 'flex:1;padding:4px 2px;font-size:0.78em;border-radius:6px;border-color:#cbd5e0;color:#4a5568;background:#fff;transition:all 0.2s;line-height:1.2;cursor:pointer';
     strokeBtn.textContent = '筆順';
     strokeBtn.title = '根據教育局學習字詞表指引播放筆順';
+    
+    const speedMenu = document.createElement('div');
+    speedMenu.style.cssText = 'display:none;position:absolute;bottom:100%;left:0;z-index:10;background:white;border:1px solid #cbd5e0;border-radius:8px;padding:4px;box-shadow:0 4px 6px rgba(0,0,0,0.1);white-space:nowrap;font-size:0.75em';
+    
+    [0.5, 1.0, 2.0].forEach(speed => {
+        const speedBtn = document.createElement('button');
+        speedBtn.className = 'btn btn-sm';
+        speedBtn.style.cssText = 'padding:2px 4px;margin:0 2px';
+        speedBtn.textContent = speed === 0.5 ? '快' : (speed === 1.0 ? '中' : '慢');
+        speedBtn.onclick = (e) => {
+            e.stopPropagation();
+            state.strokeSpeed = speed;
+            speedMenu.style.display = 'none';
+            playBoxStrokeOrder(char, hwContainer, boxSize, strokeBtn);
+        };
+        speedMenu.appendChild(speedBtn);
+    });
+
+    strokeWrapper.appendChild(strokeBtn);
+    strokeWrapper.appendChild(speedMenu);
+    
+    strokeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      speedMenu.style.display = speedMenu.style.display === 'none' ? 'block' : 'none';
+    });
 
     btnBar.appendChild(hintBtn);
-    btnBar.appendChild(strokeBtn);
+    btnBar.appendChild(strokeWrapper);
     wrap.appendChild(btnBar);
     gridEl.appendChild(wrap);
 
@@ -1306,11 +1344,6 @@ function buildCanvasGrid(text, gridEl, savedStrokes = null) {
       if (cs.hintContainer) {
         cs.hintContainer.style.visibility = cs.showHintChar ? 'visible' : 'hidden';
       }
-    });
-
-    strokeBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      playBoxStrokeOrder(char, hwContainer, boxSize, strokeBtn);
     });
   });
   updateButtonStates();
@@ -1354,51 +1387,60 @@ function redrawCanvas(cs) {
   const { ctx, canvas, strokes, hintContainer, showHintChar } = cs;
   const size = canvas.width;
   
-  // Draw TianZiGe grid first (it also clears the canvas)
+  // Create an offscreen canvas for strokes
+  const offscreen = document.createElement('canvas');
+  offscreen.width = size;
+  offscreen.height = size;
+  const offctx = offscreen.getContext('2d');
+  offctx.lineCap = 'round';
+  offctx.lineJoin = 'round';
+
+  // Draw strokes on offscreen canvas
+  strokes.forEach(stroke => {
+    const { points, isEraser, eraserSize } = stroke;
+    if (points.length === 0) return;
+
+    if (isEraser) {
+      offctx.globalCompositeOperation = 'destination-out';
+      offctx.lineWidth = eraserSize;
+    } else {
+      offctx.globalCompositeOperation = 'source-over';
+      offctx.strokeStyle = '#333';
+      offctx.lineWidth = 8;
+    }
+
+    if (points.length === 1) {
+      offctx.beginPath();
+      offctx.arc(points[0].x, points[0].y, offctx.lineWidth / 2, 0, Math.PI * 2);
+      if (!isEraser) {
+        offctx.fillStyle = offctx.strokeStyle;
+        offctx.fill();
+      } else {
+        offctx.fill();
+      }
+      return;
+    }
+    offctx.beginPath();
+    offctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length - 1; i++) {
+      const xc = (points[i].x + points[i + 1].x) / 2;
+      const yc = (points[i].y + points[i + 1].y) / 2;
+      offctx.quadraticCurveTo(points[i].x, points[i].y, xc, yc);
+    }
+    offctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
+    offctx.stroke();
+  });
+  offctx.globalCompositeOperation = 'source-over'; // Reset
+
+  // Now draw everything on the main canvas
   drawTianZiGe(ctx, size, size, true);
 
   if (hintContainer) {
     hintContainer.style.visibility = showHintChar ? 'visible' : 'hidden';
   }
 
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-
-  strokes.forEach(stroke => {
-    const { points, isEraser, eraserSize } = stroke;
-    if (points.length === 0) return;
-
-    if (isEraser) {
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.lineWidth = eraserSize;
-    } else {
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.strokeStyle = '#333';
-      ctx.lineWidth = 8;
-    }
-
-    if (points.length === 1) {
-      ctx.beginPath();
-      ctx.arc(points[0].x, points[0].y, ctx.lineWidth / 2, 0, Math.PI * 2);
-      if (!isEraser) {
-        ctx.fillStyle = ctx.strokeStyle;
-        ctx.fill();
-      } else {
-        ctx.fill();
-      }
-      return;
-    }
-    ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-    for (let i = 1; i < points.length - 1; i++) {
-      const xc = (points[i].x + points[i + 1].x) / 2;
-      const yc = (points[i].y + points[i + 1].y) / 2;
-      ctx.quadraticCurveTo(points[i].x, points[i].y, xc, yc);
-    }
-    ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
-    ctx.stroke();
-  });
-  ctx.globalCompositeOperation = 'source-over'; // Reset
+  // Draw offscreen canvas onto main canvas
+  ctx.drawImage(offscreen, 0, 0);
 }
 
 function bindCanvasEvents(cs, canvas) {
@@ -1545,6 +1587,7 @@ function nextVocab() {
   saveCurrentCanvasState();
   cleanupHW();
   resetEraser();
+  resetSpeed();
   const nextIndex = session.currentIndex + 1;
   if (nextIndex >= session.items.length) {
     showResults();
@@ -1741,17 +1784,34 @@ document.addEventListener('DOMContentLoaded', init);
 
 document.addEventListener('click', function(event) {
     const eraserMenu = document.getElementById('eraserMenu');
-    const speedMenu = document.getElementById('speedMenu');
     const eraserBtn = document.getElementById('eraserBtn');
-    const speedBtn = document.getElementById('speedBtn');
-    
     if (eraserMenu && eraserMenu.style.display === 'block' && !eraserMenu.contains(event.target) && event.target !== eraserBtn) {
         eraserMenu.style.display = 'none';
     }
+    const speedMenu = document.getElementById('speedMenu');
+    const speedBtn = document.getElementById('speedBtn');
     if (speedMenu && speedMenu.style.display === 'block' && !speedMenu.contains(event.target) && event.target !== speedBtn) {
         speedMenu.style.display = 'none';
     }
 });
+
+function handleEraserSizeClick(el) {
+    const originalBackground = el.style.background;
+    el.style.background = '#667eea'; // Blue
+    el.style.transform = 'scale(1.2)';
+    
+    setTimeout(() => {
+        el.style.background = originalBackground;
+        el.style.transform = 'scale(1)';
+    }, 200);
+}
+
+function handleEraserSizeSelection(size, el) {
+    handleEraserSizeClick(el);
+    setTimeout(() => {
+        selectEraserSize(size);
+    }, 200);
+}
 </script>
 </body>
 </html>
