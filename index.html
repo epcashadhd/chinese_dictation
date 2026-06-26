@@ -65,10 +65,10 @@ textarea:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.12)}
 .dictation-timer{font-size:1.15em;font-weight:700;color:#e74c3c;background:#fff5f5;padding:4px 14px;border-radius:50px;border:1px solid #fed7d7}
 
 /* Flip card */
-.flip-card-wrap{perspective:1000px;margin:12px 0;min-height:180px}
-.flip-card{position:relative;width:100%;min-height:180px;transition:transform .5s ease;transform-style:preserve-3d}
+.flip-card-wrap{perspective:1000px;margin:12px 0;min-height:480px}
+.flip-card{position:relative;width:100%;min-height:480px;transition:transform .5s ease;transform-style:preserve-3d}
 .flip-card.flipped{transform:rotateY(180deg)}
-.flip-front,.flip-back{position:absolute;top:0;left:0;width:100%;min-height:180px;backface-visibility:hidden;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px}
+.flip-front,.flip-back{position:absolute;top:0;left:0;width:100%;min-height:480px;backface-visibility:hidden;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px}
 .flip-front{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;z-index:2;box-shadow:0 10px 25px rgba(102,126,234,.25)}
 .flip-front .big-char{font-size:3.4em;font-weight:700;text-shadow:0 4px 12px rgba(0,0,0,.2);letter-spacing:2px}
 .flip-front .flip-hint{font-size:.95em;margin-top:8px;opacity:.9}
@@ -76,14 +76,33 @@ textarea:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.12)}
 .flip-front .flip-ready:hover{background:rgba(255,255,255,.3)}
 .flip-back{background:#f8f9fe;transform:rotateY(180deg);padding:14px;border:2px solid #e2e8f0}
 .flip-back .canvas-grid{margin:0;padding:8px;border-radius:12px;gap:8px}
+@media(max-width:600px){
+  .flip-card-wrap{min-height:380px}
+  .flip-card{min-height:380px}
+  .flip-front,.flip-back{min-height:380px;padding:12px}
+}
 
 /* Canvas grid */
-.canvas-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:8px 0;padding:14px;background:#f8f9fe;border-radius:14px;min-height:170px}
+.canvas-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin:8px 0;padding:16px;background:#f8f9fe;border-radius:14px;min-height:200px}
 .tianzige-wrap{position:relative;display:inline-block}
 .tianzige-canvas{border-radius:10px;cursor:crosshair;touch-action:none;display:block;box-shadow:0 3px 10px rgba(0,0,0,.08);background:#fff}
-.tianzige-wrap .tianzige-canvas{width:160px;height:160px}
-@media(max-width:600px){.tianzige-wrap .tianzige-canvas{width:130px!important;height:130px!important}}
-@media(max-width:400px){.tianzige-wrap .tianzige-canvas{width:105px!important;height:105px!important}}
+.tianzige-wrap .tianzige-canvas{
+  width: var(--desktop-box-size, 160px);
+  height: var(--desktop-box-size, 160px);
+  transition: width 0.2s, height 0.2s;
+}
+@media(max-width:600px){
+  .tianzige-wrap .tianzige-canvas{
+    width: var(--mobile-box-size, 130px) !important;
+    height: var(--mobile-box-size, 130px) !important;
+  }
+}
+@media(max-width:400px){
+  .tianzige-wrap .tianzige-canvas{
+    width: var(--tiny-box-size, 105px) !important;
+    height: var(--tiny-box-size, 105px) !important;
+  }
+}
 .tianzige-overlay{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;pointer-events:none}
 .tianzige-overlay .correct-char{font-size:3em;font-weight:700;color:rgba(231,76,76,.35);text-shadow:0 0 4px rgba(231,76,76,.1);cursor:pointer;pointer-events:auto}
 
@@ -206,10 +225,16 @@ textarea:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.12)}
 
 <!-- ===== DICTATION SCREEN ===== -->
 <div id="screen-dictation" class="screen">
-  <div class="dictation-header">
-    <button class="btn btn-outline btn-sm" onclick="endDictation()" data-t="結束">結束</button>
-    <div class="dict-progress" id="dictProgress">1 / 10</div>
-    <div class="dictation-timer" id="dictTimer" style="display:none">0:30</div>
+  <div class="dictation-header" style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:14px">
+    <div style="flex:1; display:flex; justify-content:flex-start">
+      <button class="btn btn-outline btn-sm" onclick="endDictation()" data-t="結束">結束</button>
+    </div>
+    <div style="display:flex; align-items:center; gap:16px; background:#f0f2fd; padding:6px 16px; border-radius:50px; border:1px solid #e2e8f0; box-shadow:0 2px 8px rgba(0,0,0,0.04)">
+      <button class="btn btn-outline btn-sm" id="dictPrevBtn" onclick="prevVocab()" style="padding:4px; min-width:32px; height:32px; border-radius:50%; font-weight:bold; font-size:1.1em; display:flex; align-items:center; justify-content:center; border-color:#667eea; color:#667eea; background:#fff" title="上一個詞語">&larr;</button>
+      <span class="dict-progress" id="dictProgress" style="font-size:1.05em; color:#4a5568; font-weight:700; user-select:none; min-width:60px; text-align:center">1 / 10</span>
+      <button class="btn btn-outline btn-sm" id="dictNextVocabBtn" onclick="nextVocab()" style="padding:4px; min-width:32px; height:32px; border-radius:50%; font-weight:bold; font-size:1.1em; display:flex; align-items:center; justify-content:center; border-color:#667eea; color:#667eea; background:#fff" title="下一個詞語">&rarr;</button>
+    </div>
+    <div style="flex:1; display:flex; justify-content:flex-end"></div>
   </div>
 
   <div class="flip-card-wrap">
@@ -271,9 +296,7 @@ textarea:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.12)}
 
 <script>
 // ====== CONFIG ======
-const CANVAS_SIZE = 160;
-const TEST_TIME_PER_CHAR_MS = 15000;
-const TEST_MIN_TIME_MS = 30000;
+const CANVAS_SIZE = 300;
 
 // ====== FIXED GRADES LIST (P.1 - P.6 & 自訂列表) ======
 const REQUIRED_GRADES = ['P.1', 'P.2', 'P.3', 'P.4', 'P.5', 'P.6', '自訂列表'];
@@ -286,8 +309,6 @@ const state = {
   lang: 'zh-HK',
   session: null,
   canvasStates: [],
-  testTimer: null,
-  testTimeLeft: 0,
   shuffle: false,
 };
 
@@ -315,60 +336,120 @@ function parseGvizResponse(rawText) {
   return null;
 }
 
+const GRADE_TAB_CANDIDATES = {
+  'P.1': ['P.1', 'P1', 'p.1', 'p1', '一年級', '小一', '1年級', 'Grade 1', 'Sheet1', '工作表1', '1'],
+  'P.2': ['P.2', 'P2', 'p.2', 'p2', '二年級', '小二', '2年級', 'Grade 2', 'Sheet2', '工作表2', '2'],
+  'P.3': ['P.3', 'P3', 'p.3', 'p3', '三年級', '小三', '3年級', 'Grade 3', 'Sheet3', '工作表3', '3'],
+  'P.4': ['P.4', 'P4', 'p.4', 'p4', '四年級', '小四', '4年級', 'Grade 4', 'Sheet4', '工作表4', '4'],
+  'P.5': ['P.5', 'P5', 'p.5', 'p5', '五年級', '小五', '5年級', 'Grade 5', 'Sheet5', '工作表5', '5'],
+  'P.6': ['P.6', 'P6', 'p.6', 'p6', '六年級', '小六', '6年級', 'Grade 6', 'Sheet6', '工作表6', '6'],
+};
+
 function parseTableStructure(table) {
-  if (!table || !table.cols) return { chapters: [], wordsByChapter: {} };
+  if (!table) return { chapters: [], wordsByChapter: {} };
 
-  let colHeaders = [];
-  let dataRows = [];
+  const allRows = [];
+  
+  if (table.cols && table.cols.length > 0) {
+    const colLabels = table.cols.map(c => (c && c.label != null) ? String(c.label).trim() : '');
+    const validColLabels = colLabels.filter(l => l && !/^[A-Z]+$/.test(l) && l !== 'id' && l !== '題號' && l !== '题号');
+    if (validColLabels.length > 0) {
+      allRows.push(colLabels);
+    }
+  }
 
-  const colLabels = table.cols.map(c => (c && c.label != null) ? String(c.label).trim() : '');
-  const hasValidColLabels = colLabels.some(l => l && l !== '題號' && l !== '题号' && l !== 'Index' && l !== 'id' && l !== 'A' && l !== 'B' && !/^[A-Z]+$/.test(l));
-
-  if (hasValidColLabels) {
-    colHeaders = colLabels;
-    dataRows = table.rows || [];
-  } else if (table.rows && table.rows.length > 0) {
-    const firstRow = table.rows[0];
-    colHeaders = (firstRow.c || []).map(cell => {
+  (table.rows || []).forEach(row => {
+    if (!row || !row.c) return;
+    const vals = row.c.map(cell => {
       if (!cell) return '';
       let v = (cell.v != null) ? cell.v : cell.f;
       return v != null ? String(v).trim() : '';
     });
-    dataRows = table.rows.slice(1);
-  } else {
-    colHeaders = colLabels;
-    dataRows = [];
+    allRows.push(vals);
+  });
+
+  if (allRows.length === 0) return { chapters: [], wordsByChapter: {} };
+
+  // 格式 B：直行列表式（帶有「章節/範圍」欄與「詞語/句子」欄）
+  for (let r = 0; r < Math.min(allRows.length, 6); r++) {
+    const row = allRows[r];
+    const chCol = row.findIndex(val => /章節|章|單元|範圍|課次|Unit|Chapter|課|週次|Week/i.test(val));
+    const wdCol = row.findIndex(val => /詞語|詞句|句子|默書內容|內容|詞|生字|Words|Text/i.test(val));
+    
+    if (chCol !== -1 && wdCol !== -1 && chCol !== wdCol) {
+      const dataRows = allRows.slice(r + 1);
+      const chaptersMap = {};
+      const chaptersList = [];
+
+      dataRows.forEach(dRow => {
+        const w = dRow[wdCol];
+        if (!w || /^\d+$/.test(w)) return;
+        const cName = dRow[chCol] || '預設範圍';
+        if (!chaptersMap[cName]) {
+          chaptersMap[cName] = [];
+          chaptersList.push(cName);
+        }
+        chaptersMap[cName].push(w);
+      });
+
+      return { chapters: chaptersList, wordsByChapter: chaptersMap };
+    }
   }
+
+  // 格式 A：橫向矩陣式（各直行欄位代表不同章節範圍）
+  let bestHeaderRowIdx = -1;
+  let maxColsCount = 0;
+
+  for (let r = 0; r < Math.min(allRows.length, 6); r++) {
+    const row = allRows[r];
+    const validCols = row.slice(1).filter(val => val && val !== '題號' && val !== '题号' && !/^[A-Z]+$/.test(val));
+    if (validCols.length > maxColsCount) {
+      maxColsCount = validCols.length;
+      bestHeaderRowIdx = r;
+    }
+  }
+
+  if (bestHeaderRowIdx === -1 || maxColsCount === 0) {
+    for (let r = 0; r < Math.min(allRows.length, 4); r++) {
+      const row = allRows[r];
+      const nonEmpty = row.filter(Boolean);
+      if (nonEmpty.length > 1 && !/^\d+$/.test(nonEmpty[1])) {
+        bestHeaderRowIdx = r;
+        break;
+      }
+    }
+  }
+
+  if (bestHeaderRowIdx === -1) return { chapters: [], wordsByChapter: {} };
+
+  const headerRow = allRows[bestHeaderRowIdx];
+  const dataRows = allRows.slice(bestHeaderRowIdx + 1);
 
   const chapters = [];
   const wordsByChapter = {};
 
-  colHeaders.forEach((header, idx) => {
-    if (idx === 0) return; // Skip Column A (題號)
-    if (!header || header === '題號' || header === '题号' || header.toLowerCase() === 'index' || /^[A-Z]+$/.test(header)) return;
+  headerRow.forEach((header, colIdx) => {
+    if (colIdx === 0 && (/題號|题号|編號|Index|ID/i.test(header) || /^\d+$/.test(header))) return;
+    if (!header || header === '題號' || header === '题号' || /^[A-Z]+$/.test(header)) return;
 
     let chName = header;
     if (wordsByChapter[chName]) {
-      chName = `${header} (${idx})`;
+      chName = `${header} (${colIdx})`;
     }
 
     chapters.push(chName);
     wordsByChapter[chName] = [];
 
-    dataRows.forEach(row => {
-      if (!row || !row.c) return;
-      const cell = row.c[idx];
-      if (cell && (cell.v != null || cell.f != null)) {
-        let rawVal = (cell.v != null) ? cell.v : cell.f;
-        let val = String(rawVal).trim();
-        if (val && !/^\d+$/.test(val)) {
-          wordsByChapter[chName].push(val);
-        }
+    dataRows.forEach(dRow => {
+      const val = dRow[colIdx];
+      if (val && !/^\d+$/.test(val) && val !== header) {
+        wordsByChapter[chName].push(val);
       }
     });
   });
 
-  return { chapters, wordsByChapter };
+  const validChapters = chapters.filter(ch => (wordsByChapter[ch] || []).length > 0);
+  return { chapters: validChapters, wordsByChapter };
 }
 
 function loadSampleMockDatabase() {
@@ -448,56 +529,75 @@ async function discoverAndLoadSheet(sheetId) {
   if (chapterSelect) { chapterSelect.innerHTML = `<option value="">${_('請先選擇年級')}</option>`; chapterSelect.disabled = true; }
 
   const pGrades = ['P.1', 'P.2', 'P.3', 'P.4', 'P.5', 'P.6'];
-  const probePromises = pGrades.map(async (tabName) => {
-    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}`;
-    try {
-      const res = await fetch(url);
-      if (res.ok) {
-        const text = await res.text();
-        const table = parseGvizResponse(text);
-        if (table && table.cols && table.cols.length > 0) {
-          const parsed = parseTableStructure(table);
-          if (parsed.chapters && parsed.chapters.length > 0) {
-            return { tabName, parsed };
+
+  const probePromises = pGrades.map(async (stdGradeName) => {
+    const candidates = GRADE_TAB_CANDIDATES[stdGradeName] || [stdGradeName];
+    for (const tabName of candidates) {
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}`;
+      try {
+        const res = await fetch(url);
+        if (res.ok) {
+          const text = await res.text();
+          const table = parseGvizResponse(text);
+          if (table && ((table.cols && table.cols.length > 0) || (table.rows && table.rows.length > 0))) {
+            const parsed = parseTableStructure(table);
+            if (parsed && parsed.chapters && parsed.chapters.length > 0) {
+              return { stdGradeName, parsed };
+            }
           }
         }
-      }
-    } catch (e) {}
+      } catch(e) {}
+    }
     return null;
   });
 
   const results = await Promise.all(probePromises);
   let anyFetched = false;
+
   results.forEach(item => {
     if (item && item.parsed) {
       anyFetched = true;
-      loadedSheetsData[item.tabName] = item.parsed;
+      loadedSheetsData[item.stdGradeName] = item.parsed;
     }
   });
+
+  // 嘗試讀取預設第一頁（不傳入 sheet 參數），防止使用者未將分頁命名為 P.1 等
+  if (!anyFetched) {
+    try {
+      const defaultUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+      const res = await fetch(defaultUrl);
+      if (res.ok) {
+        const text = await res.text();
+        const table = parseGvizResponse(text);
+        if (table) {
+          const parsed = parseTableStructure(table);
+          if (parsed && parsed.chapters && parsed.chapters.length > 0) {
+            anyFetched = true;
+            loadedSheetsData['P.1'] = parsed;
+          }
+        }
+      }
+    } catch(e) {}
+  }
 
   if (!anyFetched) {
     if (badge) { badge.textContent = _('示範題庫模式'); badge.style.background = '#fef3c7'; badge.style.color = '#d97706'; }
     if (errBox) {
       errBox.style.display = 'block';
       errBox.innerHTML = `<b>${_('無法讀取雲端試算表')} (ID: <code>${escHtml(sheetId)}</code>)</b><br>` +
-        `${_('原因：試算表未公開存取權限，或網路連線受限。')}<br>` +
+        `${_('原因：試算表未公開存取權限、分頁標籤名稱不符合（建議命名為 P.1 至 P.6），或網路受限。')}<br>` +
         `${_('解法：請於 Google 試算表點選「共用」並將權限設為「知道連結的任何人均可查看」。')}<br>` +
         `<hr style="margin:8px 0;border:none;border-top:1px dashed #feb2b2">` +
         `<b>${_('系統已自動啟用「示範題庫」')}</b>${_('，供您立即體驗各年級章節連動及測驗功能。')}`;
     }
     loadSampleMockDatabase();
   } else {
-    loadSampleMockDatabase();
-    results.forEach(item => {
-      if (item && item.parsed) {
-        loadedSheetsData[item.tabName] = item.parsed;
-      }
-    });
     if (badge) { badge.textContent = _('雲端連線成功'); badge.style.background = '#d1fae5'; badge.style.color = '#065f46'; }
   }
 
   renderGradeSelect();
-  gradeSelect.value = 'P.1';
+  const availableGrades = REQUIRED_GRADES.filter(g => g === '自訂列表' || (loadedSheetsData[g] && loadedSheetsData[g].chapters && loadedSheetsData[g].chapters.length > 0));
+  gradeSelect.value = (availableGrades.length > 0 && availableGrades[0] !== '自訂列表') ? availableGrades[0] : 'P.1';
   onGradeSelected();
 }
 
@@ -575,10 +675,11 @@ function onGradeSelected() {
   }
 
   const gradeData = loadedSheetsData[grade];
-  if (!grade || !gradeData) {
-    chapterSelect.innerHTML = `<option value="">-- ${_('此年級暫無章節')} --</option>`;
+  if (!grade || !gradeData || !gradeData.chapters || gradeData.chapters.length === 0) {
+    chapterSelect.innerHTML = `<option value="">-- ${_('雲端試算表未建立此年級範圍')} --</option>`;
     chapterSelect.disabled = true;
-    if (infoEl) infoEl.textContent = _('尚未載入詞語');
+    if (infoEl) infoEl.textContent = _('此年級暫無默書範圍');
+    document.getElementById('wordInput').value = '';
     return;
   }
 
@@ -882,12 +983,14 @@ function showItem(index) {
     return;
   }
 
-  stopTestTimer();
-  document.getElementById('dictTimer').style.display = 'none';
-
   const item = session.items[index];
   session.currentIndex = index;
   document.getElementById('dictProgress').textContent = `${index + 1} / ${session.items.length}`;
+
+  const prevBtn = document.getElementById('dictPrevBtn');
+  const nextBtn = document.getElementById('dictNextVocabBtn');
+  if (prevBtn) prevBtn.disabled = index === 0;
+  if (nextBtn) nextBtn.disabled = index === session.items.length - 1;
 
   document.getElementById('flipCard').classList.remove('flipped');
   document.getElementById('flipFrontChar').textContent = item.text;
@@ -895,14 +998,13 @@ function showItem(index) {
   document.getElementById('flipFrontHint').textContent = isLong ? _('句子') : _('詞語');
   document.getElementById('flipCard').scrollIntoView({ block: 'start', behavior: 'smooth' });
 
-  buildCanvasGrid(item.text, document.getElementById('flipCanvasGrid'));
+  buildCanvasGrid(item.text, document.getElementById('flipCanvasGrid'), item.canvasStrokes || null);
 }
 
 function flipCard() {
   document.getElementById('flipCard').classList.add('flipped');
   const item = state.session.items[state.session.currentIndex];
   if (item) {
-    startTestTimer(item.text);
     speakCurrent();
   }
 }
@@ -932,13 +1034,73 @@ function speakCurrent() {
 }
 
 // ====== BUILD CANVAS GRID ======
-function buildCanvasGrid(text, gridEl) {
+function buildCanvasGrid(text, gridEl, savedStrokes = null) {
   const chars = [...text];
   gridEl.innerHTML = '';
   state.canvasStates = [];
 
   const isLong = chars.length >= 5;
   gridEl.style.maxWidth = isLong ? '900px' : '100%';
+
+  // Determine ideal box size based on screen width and character count
+  const count = chars.length;
+  const cols = Math.min(4, count);
+  const rows = Math.ceil(count / 4);
+
+  let desktopSize = 180;
+  let mobileSize = 145;
+  let tinySize = 110;
+
+  if (cols === 1) {
+    desktopSize = 420;
+    mobileSize = 320;
+    tinySize = 250;
+  } else if (cols === 2) {
+    desktopSize = 320;
+    mobileSize = 240;
+    tinySize = 180;
+  } else if (cols === 3) {
+    desktopSize = 260;
+    mobileSize = 180;
+    tinySize = 140;
+  } else {
+    desktopSize = 200;
+    mobileSize = 150;
+    tinySize = 110;
+  }
+
+  // Set the grid layout properties to strictly enforce max 4 per row
+  gridEl.style.display = 'grid';
+  gridEl.style.gridTemplateColumns = `repeat(${cols}, minmax(0, max-content))`;
+  gridEl.style.justifyContent = 'center';
+  gridEl.style.gap = '16px';
+
+  // Dynamic card height scaling to support multi-row layouts beautifully
+  const wrapEl = document.querySelector('.flip-card-wrap');
+  const cardEl = document.getElementById('flipCard');
+  const frontEl = document.querySelector('.flip-front');
+  const backEl = document.querySelector('.flip-back');
+
+  let minH = 480;
+  if (window.innerWidth <= 600) {
+    minH = 380;
+  }
+  
+  let calcHeight = minH;
+  if (window.innerWidth <= 600) {
+    calcHeight = Math.max(380, rows * (mobileSize + 24) + 120);
+  } else {
+    calcHeight = Math.max(480, rows * (desktopSize + 24) + 150);
+  }
+  
+  if (wrapEl) wrapEl.style.height = `${calcHeight}px`;
+  if (cardEl) cardEl.style.height = `${calcHeight}px`;
+  if (frontEl) frontEl.style.minHeight = `${calcHeight}px`;
+  if (backEl) backEl.style.minHeight = `${calcHeight}px`;
+
+  gridEl.style.setProperty('--desktop-box-size', `${desktopSize}px`);
+  gridEl.style.setProperty('--mobile-box-size', `${mobileSize}px`);
+  gridEl.style.setProperty('--tiny-box-size', `${tinySize}px`);
 
   chars.forEach((char, i) => {
     const wrap = document.createElement('div');
@@ -957,7 +1119,7 @@ function buildCanvasGrid(text, gridEl) {
     const cs = {
       canvas,
       ctx: canvas.getContext('2d'),
-      strokes: [],
+      strokes: (savedStrokes && savedStrokes[i]) ? JSON.parse(JSON.stringify(savedStrokes[i])) : [],
       currentStroke: null,
       isDrawing: false,
       char,
@@ -966,6 +1128,9 @@ function buildCanvasGrid(text, gridEl) {
     state.canvasStates.push(cs);
     drawTianZiGe(cs.ctx, CANVAS_SIZE, CANVAS_SIZE);
     bindCanvasEvents(cs, canvas);
+    if (cs.strokes.length > 0) {
+      redrawCanvas(cs);
+    }
   });
 }
 
@@ -976,31 +1141,31 @@ function drawTianZiGe(ctx, w, h) {
   ctx.fillRect(0, 0, w, h);
 
   ctx.strokeStyle = '#d0d0e0';
-  ctx.lineWidth = 1.5;
+  ctx.lineWidth = 3.5;
   ctx.setLineDash([]);
-  ctx.strokeRect(2, 2, w - 4, h - 4);
+  ctx.strokeRect(4, 4, w - 8, h - 8);
 
-  ctx.setLineDash([4, 4]);
+  ctx.setLineDash([8, 8]);
   ctx.beginPath();
-  ctx.moveTo(w / 2, 2);
-  ctx.lineTo(w / 2, h - 2);
+  ctx.moveTo(w / 2, 4);
+  ctx.lineTo(w / 2, h - 4);
   ctx.stroke();
 
   ctx.beginPath();
-  ctx.moveTo(2, h / 2);
-  ctx.lineTo(w - 2, h / 2);
+  ctx.moveTo(4, h / 2);
+  ctx.lineTo(w - 4, h / 2);
   ctx.stroke();
 
-  ctx.setLineDash([2, 6]);
+  ctx.setLineDash([4, 12]);
   ctx.strokeStyle = '#e0e0f0';
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(2, 2);
-  ctx.lineTo(w - 2, h - 2);
+  ctx.moveTo(4, 4);
+  ctx.lineTo(w - 4, h - 4);
   ctx.stroke();
   ctx.beginPath();
-  ctx.moveTo(w - 2, 2);
-  ctx.lineTo(2, h - 2);
+  ctx.moveTo(w - 4, 4);
+  ctx.lineTo(4, h - 4);
   ctx.stroke();
   ctx.setLineDash([]);
 }
@@ -1011,7 +1176,7 @@ function redrawCanvas(cs) {
   drawTianZiGe(ctx, size, size);
 
   ctx.strokeStyle = '#333';
-  ctx.lineWidth = 4;
+  ctx.lineWidth = 8;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
 
@@ -1093,68 +1258,46 @@ function undoLastStroke() {
 }
 
 // ====== TIMER ======
-function startTestTimer(text) {
-  stopTestTimer();
-  const timePerChar = Math.max(TEST_TIME_PER_CHAR_MS, 10000);
-  const totalTime = Math.max(text.length * timePerChar, TEST_MIN_TIME_MS);
-  state.testTimeLeft = Math.ceil(totalTime / 1000);
+function startTestTimer(text) {}
+function stopTestTimer() {}
+function updateTimerDisplay() {}
 
-  const timerEl = document.getElementById('dictTimer');
-  timerEl.style.display = 'block';
-  timerEl.classList.remove('timer-critical');
-  updateTimerDisplay();
-
-  state.testTimer = setInterval(() => {
-    state.testTimeLeft--;
-    updateTimerDisplay();
-    if (state.testTimeLeft <= 5) timerEl.classList.add('timer-critical');
-    if (state.testTimeLeft <= 0) {
-      clearInterval(state.testTimer);
-      state.testTimer = null;
-      nextItem();
-    }
-  }, 1000);
-}
-
-function stopTestTimer() {
-  if (state.testTimer) {
-    clearInterval(state.testTimer);
-    state.testTimer = null;
+function saveCurrentCanvasState() {
+  const session = state.session;
+  if (session && state.canvasStates.length > 0) {
+    const item = session.items[session.currentIndex];
+    item.canvasImages = state.canvasStates.map(cs => cs.canvas.toDataURL());
+    item.canvasStrokes = state.canvasStates.map(cs => JSON.parse(JSON.stringify(cs.strokes)));
   }
 }
 
-function updateTimerDisplay() {
-  const m = Math.floor(state.testTimeLeft / 60);
-  const s = state.testTimeLeft % 60;
-  document.getElementById('dictTimer').textContent = `${m}:${s.toString().padStart(2, '0')}`;
-}
-
-// ====== NEXT ITEM ======
-function nextItem() {
+function prevVocab() {
   const session = state.session;
   if (!session) return;
+  if (session.currentIndex > 0) {
+    saveCurrentCanvasState();
+    cleanupHW();
+    const prevIndex = session.currentIndex - 1;
+    showItem(prevIndex);
+  }
+}
 
-  state.canvasStates.forEach(cs => { cs.submitted = true; });
-
-  const item = session.items[session.currentIndex];
-  item.canvasImages = state.canvasStates.map(cs => cs.canvas.toDataURL());
-
-  stopTestTimer();
+function nextVocab() {
+  const session = state.session;
+  if (!session) return;
+  saveCurrentCanvasState();
   cleanupHW();
-
-  state.canvasStates.forEach(cs => {
-    cs.submitted = false;
-    cs.strokes = [];
-    cs.currentStroke = null;
-  });
-
   const nextIndex = session.currentIndex + 1;
   if (nextIndex >= session.items.length) {
     showResults();
   } else {
-    document.getElementById('flipCard').classList.remove('flipped');
     showItem(nextIndex);
   }
+}
+
+// ====== NEXT ITEM ======
+function nextItem() {
+  nextVocab();
 }
 
 // ====== STROKE ORDER ======
