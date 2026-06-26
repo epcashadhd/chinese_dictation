@@ -222,7 +222,9 @@ textarea:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.12)}
       <span class="dict-progress" id="dictProgress" style="font-size:1.05em; color:#4a5568; font-weight:700; user-select:none; min-width:60px; text-align:center">1 / 10</span>
       <button class="btn btn-outline btn-sm" id="dictNextVocabBtn" onclick="nextVocab()" style="padding:4px; min-width:32px; height:32px; border-radius:50%; font-weight:bold; font-size:1.1em; display:flex; align-items:center; justify-content:center; border-color:#667eea; color:#667eea; background:#fff" title="下一個詞語">&rarr;</button>
     </div>
-    <div style="flex:1; display:flex; justify-content:flex-end"></div>
+    <div style="flex:1; display:flex; justify-content:flex-end">
+      <button class="btn btn-outline btn-sm" onclick="showResults()" data-t="結果">結果</button>
+    </div>
   </div>
 
   <div class="flip-card-wrap">
@@ -235,12 +237,37 @@ textarea:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.12)}
       <div class="flip-back">
         <div class="canvas-grid" id="flipCanvasGrid"></div>
         <div class="dict-controls">
-          <button class="btn btn-outline btn-sm" onclick="speakCurrent()" data-t="朗讀">朗讀</button>
-          <button class="btn btn-outline btn-sm" onclick="clearAllCanvas()" data-t="清空">清空</button>
-          <button class="btn btn-outline btn-sm" onclick="undoLastStroke()" data-t="復原">復原</button>
+          <button class="btn btn-outline btn-sm" onclick="speakCurrent(); handleButtonClick(this);" title="朗讀" style="padding: 4px;">
+            <svg style="pointer-events: none" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.57 8.43a5 5 0 0 1 0 7.07"></path></svg>
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="clearAllCanvas(); handleButtonClick(this);" title="清空" style="padding: 4px;">
+            <svg style="pointer-events: none" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="undoLastStroke(); handleButtonClick(this);" title="復原" style="padding: 4px;">
+            <svg style="pointer-events: none" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
+          </button>
+          <div style="position:relative; display:inline-block">
+            <button class="btn btn-outline btn-sm" onclick="toggleEraser(); handleButtonClick(this);" title="橡皮擦" id="eraserBtn" style="padding: 4px;">
+              <svg style="pointer-events: none" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
+            </button>
+            <div id="eraserMenu" style="display:none; position:absolute; bottom:100%; left:0; z-index:10; background:white; border:1px solid #cbd5e0; border-radius:8px; padding:8px; box-shadow:0 4px 6px rgba(0,0,0,0.1); white-space:nowrap;">
+              <div onclick="selectEraserSize(8)" style="width:16px; height:16px; border-radius:50%; background:#4a5568; display:inline-block; cursor:pointer; margin:4px;"></div>
+              <div onclick="selectEraserSize(24)" style="width:24px; height:24px; border-radius:50%; background:#4a5568; display:inline-block; cursor:pointer; margin:4px;"></div>
+            </div>
+          </div>
+          <div style="position:relative; display:inline-block">
+            <button class="btn btn-outline btn-sm" onclick="toggleSpeedMenu(); handleButtonClick(this);" title="筆順速度" id="speedBtn" style="padding: 4px;">
+              <svg style="pointer-events: none" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </button>
+            <div id="speedMenu" style="display:none; position:absolute; bottom:100%; left:0; z-index:10; background:white; border:1px solid #cbd5e0; border-radius:8px; padding:8px; box-shadow:0 4px 6px rgba(0,0,0,0.1); white-space:nowrap;">
+              <div onclick="setStrokeSpeed(2.0)" style="cursor:pointer; padding:4px 8px; font-size:12px;">快</div>
+              <div onclick="setStrokeSpeed(1.0)" style="cursor:pointer; padding:4px 8px; font-size:12px;">中</div>
+              <div onclick="setStrokeSpeed(0.5)" style="cursor:pointer; padding:4px 8px; font-size:12px;">慢</div>
+            </div>
+          </div>
         </div>
         <div style="text-align:center;margin-top:12px">
-          <button class="btn btn-primary btn-lg" onclick="nextItem()" id="dictNextBtn" style="padding:12px 40px" data-t="下一步">下一步</button>
+          <button class="btn btn-primary btn-lg" onclick="nextItem()" id="dictNextBtn" style="padding:12px 40px" data-t="提交">提交</button>
         </div>
       </div>
     </div>
@@ -298,7 +325,48 @@ const state = {
   session: null,
   canvasStates: [],
   shuffle: false,
+  isEraser: false,
+  eraserSize: 16,
+  strokeSpeed: 1.0,
 };
+
+function resetEraser() {
+  state.isEraser = false;
+  state.eraserSize = 16;
+  const eraserBtn = document.getElementById('eraserBtn');
+  const eraserMenu = document.getElementById('eraserMenu');
+  if (eraserBtn) {
+    eraserBtn.style.background = '#fff';
+    eraserBtn.style.borderColor = '#cbd5e0';
+    eraserBtn.style.color = '#4a5568';
+    eraserBtn.title = '橡皮擦';
+  }
+  if (eraserMenu) {
+    eraserMenu.style.display = 'none';
+  }
+}
+
+function toggleEraser() {
+  if (state.isEraser) {
+    resetEraser();
+  } else {
+    const menu = document.getElementById('eraserMenu');
+    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  }
+}
+
+function selectEraserSize(size) {
+  state.isEraser = true;
+  state.eraserSize = size;
+  document.getElementById('eraserMenu').style.display = 'none';
+  
+  // Highlight eraser button
+  const eraserBtn = document.getElementById('eraserBtn');
+  eraserBtn.style.background = '#ebf4ff';
+  eraserBtn.style.borderColor = '#667eea';
+  eraserBtn.style.color = '#667eea';
+  eraserBtn.title = `橡皮擦 (大小: ${state.eraserSize})`;
+}
 
 function getSpreadsheetIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
@@ -1021,8 +1089,37 @@ function speakCurrent() {
 }
 
 // ====== BOX STROKE ORDER HELPER ======
-function playBoxStrokeOrder(char, containerEl, size) {
+function setStrokeSpeed(speed) {
+  state.strokeSpeed = speed;
+  document.getElementById('speedMenu').style.display = 'none';
+}
+
+function toggleSpeedMenu() {
+  const menu = document.getElementById('speedMenu');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+function playBoxStrokeOrder(char, containerEl, size, btnEl = null) {
   if (typeof HanziWriter === 'undefined' || !char) return;
+
+  if (btnEl) {
+    btnEl.style.background = '#ebf4ff';
+    btnEl.style.borderColor = '#667eea';
+    btnEl.style.color = '#667eea';
+    btnEl.style.fontWeight = '700';
+  }
+
+  const finish = () => {
+    containerEl.style.display = 'none';
+    containerEl.innerHTML = '';
+    if (btnEl) {
+      btnEl.style.background = '#fff';
+      btnEl.style.borderColor = '#cbd5e0';
+      btnEl.style.color = '#4a5568';
+      btnEl.style.fontWeight = 'normal';
+    }
+  };
+
   containerEl.style.display = 'flex';
   containerEl.style.alignItems = 'center';
   containerEl.style.justifyContent = 'center';
@@ -1033,26 +1130,26 @@ function playBoxStrokeOrder(char, containerEl, size) {
     const writer = HanziWriter.create(containerEl, char, {
       width: size, height: size, padding: pad,
       strokeColor: '#e74c3c', radicalColor: '#c0392b',
-      showCharacter: false, strokeAnimationDuration: 380,
-      delayBetweenStrokes: 110,
+      showCharacter: false,
+      strokeAnimationDuration: Math.floor(380 / state.strokeSpeed),
+      delayBetweenStrokes: Math.floor(110 / state.strokeSpeed),
     });
     setTimeout(() => {
       if (writer && writer.animateCharacter) {
         const p = writer.animateCharacter();
         if (p && p.then) {
           p.then(() => {
-            setTimeout(() => {
-              containerEl.style.display = 'none';
-              containerEl.innerHTML = '';
-            }, 1200);
-          }).catch(() => {
-            containerEl.style.display = 'none';
-          });
+            setTimeout(finish, 1200);
+          }).catch(finish);
+        } else {
+          setTimeout(finish, 2000);
         }
+      } else {
+        finish();
       }
     }, 150);
   } catch(err) {
-    containerEl.style.display = 'none';
+    finish();
   }
 }
 
@@ -1152,7 +1249,7 @@ function buildCanvasGrid(text, gridEl, savedStrokes = null) {
 
     const hwContainer = document.createElement('div');
     hwContainer.className = 'box-hw-overlay';
-    hwContainer.style.cssText = `position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10;display:none;background:rgba(255,255,255,0.92);border-radius:10px`;
+    hwContainer.style.cssText = `position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10;display:none;background:#ffffff;border-radius:10px`;
 
     canvasBox.appendChild(hintContainer);
     canvasBox.appendChild(canvas);
@@ -1173,7 +1270,7 @@ function buildCanvasGrid(text, gridEl, savedStrokes = null) {
     const strokeBtn = document.createElement('button');
     strokeBtn.type = 'button';
     strokeBtn.className = 'btn btn-outline btn-sm';
-    strokeBtn.style.cssText = 'flex:1;padding:4px 2px;font-size:0.78em;border-radius:6px;border-color:#667eea;color:#667eea;background:#fff;transition:all 0.2s;line-height:1.2;cursor:pointer';
+    strokeBtn.style.cssText = 'flex:1;padding:4px 2px;font-size:0.78em;border-radius:6px;border-color:#cbd5e0;color:#4a5568;background:#fff;transition:all 0.2s;line-height:1.2;cursor:pointer';
     strokeBtn.textContent = '筆順';
     strokeBtn.title = '根據教育局學習字詞表指引播放筆順';
 
@@ -1202,9 +1299,9 @@ function buildCanvasGrid(text, gridEl, savedStrokes = null) {
     hintBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       cs.showHintChar = !cs.showHintChar;
-      hintBtn.style.background = cs.showHintChar ? '#edf2f7' : '#fff';
-      hintBtn.style.borderColor = cs.showHintChar ? '#718096' : '#cbd5e0';
-      hintBtn.style.color = cs.showHintChar ? '#1a202c' : '#4a5568';
+      hintBtn.style.background = cs.showHintChar ? '#ebf4ff' : '#fff';
+      hintBtn.style.borderColor = cs.showHintChar ? '#667eea' : '#cbd5e0';
+      hintBtn.style.color = cs.showHintChar ? '#667eea' : '#4a5568';
       hintBtn.style.fontWeight = cs.showHintChar ? '700' : 'normal';
       if (cs.hintContainer) {
         cs.hintContainer.style.visibility = cs.showHintChar ? 'visible' : 'hidden';
@@ -1213,14 +1310,15 @@ function buildCanvasGrid(text, gridEl, savedStrokes = null) {
 
     strokeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      playBoxStrokeOrder(char, hwContainer, boxSize);
+      playBoxStrokeOrder(char, hwContainer, boxSize, strokeBtn);
     });
   });
+  updateButtonStates();
 }
 
 // ====== CANVAS DRAWING ======
-function drawTianZiGe(ctx, w, h) {
-  ctx.clearRect(0, 0, w, h);
+function drawTianZiGe(ctx, w, h, clear = true) {
+  if (clear) ctx.clearRect(0, 0, w, h);
 
   ctx.strokeStyle = '#d0d0e0';
   ctx.lineWidth = 3.5;
@@ -1255,24 +1353,39 @@ function drawTianZiGe(ctx, w, h) {
 function redrawCanvas(cs) {
   const { ctx, canvas, strokes, hintContainer, showHintChar } = cs;
   const size = canvas.width;
-  drawTianZiGe(ctx, size, size);
+  
+  // Draw TianZiGe grid first (it also clears the canvas)
+  drawTianZiGe(ctx, size, size, true);
 
   if (hintContainer) {
     hintContainer.style.visibility = showHintChar ? 'visible' : 'hidden';
   }
 
-  ctx.strokeStyle = '#333';
-  ctx.lineWidth = 8;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
 
-  strokes.forEach(points => {
+  strokes.forEach(stroke => {
+    const { points, isEraser, eraserSize } = stroke;
     if (points.length === 0) return;
+
+    if (isEraser) {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.lineWidth = eraserSize;
+    } else {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 8;
+    }
+
     if (points.length === 1) {
       ctx.beginPath();
       ctx.arc(points[0].x, points[0].y, ctx.lineWidth / 2, 0, Math.PI * 2);
-      ctx.fillStyle = ctx.strokeStyle;
-      ctx.fill();
+      if (!isEraser) {
+        ctx.fillStyle = ctx.strokeStyle;
+        ctx.fill();
+      } else {
+        ctx.fill();
+      }
       return;
     }
     ctx.beginPath();
@@ -1285,6 +1398,7 @@ function redrawCanvas(cs) {
     ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
     ctx.stroke();
   });
+  ctx.globalCompositeOperation = 'source-over'; // Reset
 }
 
 function bindCanvasEvents(cs, canvas) {
@@ -1298,20 +1412,21 @@ function bindCanvasEvents(cs, canvas) {
   };
 
   const startDraw = (e) => {
-    if (cs.submitted) return;
+    if (cs.submitted || cs.hwContainer.style.display !== 'none') return;
     e.preventDefault();
     const pos = getPos(e);
     cs.isDrawing = true;
-    cs.currentStroke = [pos];
+    cs.currentStroke = { points: [pos], isEraser: state.isEraser, eraserSize: state.eraserSize };
     cs.strokes.push(cs.currentStroke);
     redrawCanvas(cs);
+    updateButtonStates();
   };
 
   const moveDraw = (e) => {
-    if (!cs.isDrawing || cs.submitted) return;
+    if (!cs.isDrawing || cs.submitted || cs.hwContainer.style.display !== 'none') return;
     e.preventDefault();
     const pos = getPos(e);
-    cs.currentStroke.push(pos);
+    cs.currentStroke.points.push(pos);
     redrawCanvas(cs);
   };
 
@@ -1338,6 +1453,44 @@ function clearAllCanvas() {
     cs.canvas.style.opacity = '1';
     redrawCanvas(cs);
   });
+  updateButtonStates();
+}
+
+function updateButtonStates() {
+  const buttons = document.querySelectorAll('.dict-controls button');
+  
+  buttons.forEach(btn => {
+    if (btn.id === 'eraserBtn') {
+        // Eraser button active style
+        if (state.isEraser) {
+            btn.style.background = '#ebf4ff';
+            btn.style.borderColor = '#667eea';
+            btn.style.color = '#667eea';
+        } else {
+            btn.style.background = '#fff';
+            btn.style.borderColor = '#cbd5e0';
+            btn.style.color = '#4a5568';
+        }
+        return;
+    }
+
+    // For Speak, Clear, Undo buttons: Always look grey (inactive), but remain enabled.
+    btn.style.borderColor = '#cbd5e0';
+    btn.style.color = '#a0aec0';
+    btn.style.background = '#f7fafc';
+    btn.disabled = false; // Always enabled
+  });
+}
+
+function handleButtonClick(btn) {
+    // Brief blue highlight when pressed
+    btn.style.borderColor = '#667eea';
+    btn.style.color = '#667eea';
+    btn.style.background = '#ebf4ff';
+    
+    setTimeout(() => {
+        updateButtonStates(); // Reset to grey style
+    }, 200);
 }
 
 function undoLastStroke() {
@@ -1346,6 +1499,7 @@ function undoLastStroke() {
     if (cs.strokes.length > 0) {
       cs.strokes.pop();
       redrawCanvas(cs);
+      updateButtonStates();
       return;
     }
   }
@@ -1390,6 +1544,7 @@ function nextVocab() {
   if (!session) return;
   saveCurrentCanvasState();
   cleanupHW();
+  resetEraser();
   const nextIndex = session.currentIndex + 1;
   if (nextIndex >= session.items.length) {
     showResults();
@@ -1583,6 +1738,20 @@ function init() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+document.addEventListener('click', function(event) {
+    const eraserMenu = document.getElementById('eraserMenu');
+    const speedMenu = document.getElementById('speedMenu');
+    const eraserBtn = document.getElementById('eraserBtn');
+    const speedBtn = document.getElementById('speedBtn');
+    
+    if (eraserMenu && eraserMenu.style.display === 'block' && !eraserMenu.contains(event.target) && event.target !== eraserBtn) {
+        eraserMenu.style.display = 'none';
+    }
+    if (speedMenu && speedMenu.style.display === 'block' && !speedMenu.contains(event.target) && event.target !== speedBtn) {
+        speedMenu.style.display = 'none';
+    }
+});
 </script>
 </body>
 </html>
