@@ -87,21 +87,9 @@ textarea:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.12)}
 .tianzige-wrap{position:relative;display:inline-block}
 .tianzige-canvas{border-radius:10px;cursor:crosshair;touch-action:none;display:block;box-shadow:0 3px 10px rgba(0,0,0,.08);background:#fff}
 .tianzige-wrap .tianzige-canvas{
-  width: var(--desktop-box-size, 160px);
-  height: var(--desktop-box-size, 160px);
+  width: var(--dynamic-box-size, 160px) !important;
+  height: var(--dynamic-box-size, 160px) !important;
   transition: width 0.2s, height 0.2s;
-}
-@media(max-width:600px){
-  .tianzige-wrap .tianzige-canvas{
-    width: var(--mobile-box-size, 130px) !important;
-    height: var(--mobile-box-size, 130px) !important;
-  }
-}
-@media(max-width:400px){
-  .tianzige-wrap .tianzige-canvas{
-    width: var(--tiny-box-size, 105px) !important;
-    height: var(--tiny-box-size, 105px) !important;
-  }
 }
 .tianzige-overlay{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;pointer-events:none}
 .tianzige-overlay .correct-char{font-size:3em;font-weight:700;color:rgba(231,76,76,.35);text-shadow:0 0 4px rgba(231,76,76,.1);cursor:pointer;pointer-events:auto}
@@ -996,7 +984,6 @@ function showItem(index) {
   document.getElementById('flipFrontChar').textContent = item.text;
   const isLong = item.text.length >= 5;
   document.getElementById('flipFrontHint').textContent = isLong ? _('句子') : _('詞語');
-  document.getElementById('flipCard').scrollIntoView({ block: 'start', behavior: 'smooth' });
 
   buildCanvasGrid(item.text, document.getElementById('flipCanvasGrid'), item.canvasStrokes || null);
 }
@@ -1033,87 +1020,166 @@ function speakCurrent() {
   audio.play().catch(() => {});
 }
 
+// ====== BOX STROKE ORDER HELPER ======
+function playBoxStrokeOrder(char, containerEl, size) {
+  if (typeof HanziWriter === 'undefined' || !char) return;
+  containerEl.style.display = 'flex';
+  containerEl.style.alignItems = 'center';
+  containerEl.style.justifyContent = 'center';
+  containerEl.innerHTML = '';
+
+  try {
+    const pad = Math.max(4, Math.floor(size * 0.06));
+    const writer = HanziWriter.create(containerEl, char, {
+      width: size, height: size, padding: pad,
+      strokeColor: '#e74c3c', radicalColor: '#c0392b',
+      showCharacter: false, strokeAnimationDuration: 380,
+      delayBetweenStrokes: 110,
+    });
+    setTimeout(() => {
+      if (writer && writer.animateCharacter) {
+        const p = writer.animateCharacter();
+        if (p && p.then) {
+          p.then(() => {
+            setTimeout(() => {
+              containerEl.style.display = 'none';
+              containerEl.innerHTML = '';
+            }, 1200);
+          }).catch(() => {
+            containerEl.style.display = 'none';
+          });
+        }
+      }
+    }, 150);
+  } catch(err) {
+    containerEl.style.display = 'none';
+  }
+}
+
 // ====== BUILD CANVAS GRID ======
 function buildCanvasGrid(text, gridEl, savedStrokes = null) {
   const chars = [...text];
   gridEl.innerHTML = '';
   state.canvasStates = [];
 
-  const isLong = chars.length >= 5;
-  gridEl.style.maxWidth = isLong ? '900px' : '100%';
-
-  // Determine ideal box size based on screen width and character count
   const count = chars.length;
-  const cols = Math.min(4, count);
-  const rows = Math.ceil(count / 4);
+  const screenW = window.innerWidth || document.documentElement.clientWidth || 380;
+  
+  // 在手機直向（螢幕較窄）時，如字數超過2個，限制每列最多放2個字；平板及電腦最多4個字
+  const maxColsPerRow = screenW < 550 ? 2 : 4;
+  const cols = Math.min(maxColsPerRow, count);
+  const rows = Math.ceil(count / cols);
 
-  let desktopSize = 180;
-  let mobileSize = 145;
-  let tinySize = 110;
+  // 根據螢幕可用寬度動態極大化計算每個寫字格的大細，絕對避免重疊
+  const availableW = Math.min(screenW - 52, 860);
+  const gap = 16;
+  const calculatedSize = Math.floor((availableW - (cols - 1) * gap) / cols);
 
+  let boxSize = calculatedSize;
   if (cols === 1) {
-    desktopSize = 420;
-    mobileSize = 320;
-    tinySize = 250;
+    boxSize = Math.min(calculatedSize, screenW < 600 ? 280 : 400);
   } else if (cols === 2) {
-    desktopSize = 320;
-    mobileSize = 240;
-    tinySize = 180;
-  } else if (cols === 3) {
-    desktopSize = 260;
-    mobileSize = 180;
-    tinySize = 140;
+    boxSize = Math.min(calculatedSize, screenW < 600 ? 155 : 300);
   } else {
-    desktopSize = 200;
-    mobileSize = 150;
-    tinySize = 110;
+    boxSize = Math.min(calculatedSize, screenW < 600 ? 145 : 220);
   }
+  boxSize = Math.max(boxSize, 85); // 最細下限
 
-  // Set the grid layout properties to strictly enforce max 4 per row
   gridEl.style.display = 'grid';
-  gridEl.style.gridTemplateColumns = `repeat(${cols}, minmax(0, max-content))`;
+  gridEl.style.gridTemplateColumns = `repeat(${cols}, minmax(0, ${boxSize}px))`;
   gridEl.style.justifyContent = 'center';
-  gridEl.style.gap = '16px';
+  gridEl.style.gap = `${gap}px`;
+  gridEl.style.maxWidth = '100%';
 
-  // Dynamic card height scaling to support multi-row layouts beautifully
+  // 動態卡片高度設定（加上下方按鈕行高度）
   const wrapEl = document.querySelector('.flip-card-wrap');
   const cardEl = document.getElementById('flipCard');
   const frontEl = document.querySelector('.flip-front');
   const backEl = document.querySelector('.flip-back');
 
-  let minH = 480;
-  if (window.innerWidth <= 600) {
-    minH = 380;
-  }
-  
-  let calcHeight = minH;
-  if (window.innerWidth <= 600) {
-    calcHeight = Math.max(380, rows * (mobileSize + 24) + 120);
-  } else {
-    calcHeight = Math.max(480, rows * (desktopSize + 24) + 150);
-  }
-  
+  const minH = screenW <= 600 ? 420 : 520;
+  const btnBarH = 52;
+  const calcHeight = Math.max(minH, rows * (boxSize + btnBarH + gap) + 140);
+
   if (wrapEl) wrapEl.style.height = `${calcHeight}px`;
   if (cardEl) cardEl.style.height = `${calcHeight}px`;
   if (frontEl) frontEl.style.minHeight = `${calcHeight}px`;
   if (backEl) backEl.style.minHeight = `${calcHeight}px`;
 
-  gridEl.style.setProperty('--desktop-box-size', `${desktopSize}px`);
-  gridEl.style.setProperty('--mobile-box-size', `${mobileSize}px`);
-  gridEl.style.setProperty('--tiny-box-size', `${tinySize}px`);
+  gridEl.style.setProperty('--dynamic-box-size', `${boxSize}px`);
 
   chars.forEach((char, i) => {
     const wrap = document.createElement('div');
     wrap.className = 'tianzige-wrap';
     wrap.dataset.index = i;
+    wrap.style.width = `${boxSize}px`;
+    wrap.style.display = 'flex';
+    wrap.style.flexDirection = 'column';
+    wrap.style.alignItems = 'center';
+
+    const canvasBox = document.createElement('div');
+    canvasBox.style.position = 'relative';
+    canvasBox.style.width = `${boxSize}px`;
+    canvasBox.style.height = `${boxSize}px`;
+    canvasBox.style.borderRadius = '10px';
+    canvasBox.style.boxShadow = '0 3px 10px rgba(0,0,0,.08)';
+    canvasBox.style.background = '#fff';
+
+    const hintContainer = document.createElement('div');
+    hintContainer.className = 'box-hint-overlay';
+    hintContainer.style.cssText = `position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;visibility:hidden;opacity:0.35;display:flex;align-items:center;justify-content:center;`;
+
+    if (typeof HanziWriter !== 'undefined' && char && char.trim()) {
+      try {
+        const pad = Math.max(4, Math.floor(boxSize * 0.06));
+        HanziWriter.create(hintContainer, char, {
+          width: boxSize,
+          height: boxSize,
+          padding: pad,
+          showCharacter: true,
+          showOutline: false,
+          strokeColor: '#4a5568',
+        });
+      } catch(e) {}
+    }
 
     const canvas = document.createElement('canvas');
     canvas.className = 'tianzige-canvas';
     canvas.dataset.index = i;
     canvas.width = CANVAS_SIZE;
     canvas.height = CANVAS_SIZE;
+    canvas.style.cssText = `position:relative;z-index:2;background:transparent;width:${boxSize}px;height:${boxSize}px;box-shadow:none;`;
 
-    wrap.appendChild(canvas);
+    const hwContainer = document.createElement('div');
+    hwContainer.className = 'box-hw-overlay';
+    hwContainer.style.cssText = `position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10;display:none;background:rgba(255,255,255,0.92);border-radius:10px`;
+
+    canvasBox.appendChild(hintContainer);
+    canvasBox.appendChild(canvas);
+    canvasBox.appendChild(hwContainer);
+    wrap.appendChild(canvasBox);
+
+    // 下方兩個按鈕（提示 & 播放筆順）
+    const btnBar = document.createElement('div');
+    btnBar.style.cssText = 'display:flex;gap:6px;margin-top:8px;width:100%;justify-content:center';
+
+    const hintBtn = document.createElement('button');
+    hintBtn.type = 'button';
+    hintBtn.className = 'btn btn-outline btn-sm';
+    hintBtn.style.cssText = 'flex:1;padding:4px 2px;font-size:0.78em;border-radius:6px;border-color:#cbd5e0;color:#4a5568;background:#fff;transition:all 0.2s;line-height:1.2;cursor:pointer';
+    hintBtn.textContent = '💡 提示';
+    hintBtn.title = '顯示香港小學字詞表標準正體提示';
+
+    const strokeBtn = document.createElement('button');
+    strokeBtn.type = 'button';
+    strokeBtn.className = 'btn btn-outline btn-sm';
+    strokeBtn.style.cssText = 'flex:1;padding:4px 2px;font-size:0.78em;border-radius:6px;border-color:#667eea;color:#667eea;background:#fff;transition:all 0.2s;line-height:1.2;cursor:pointer';
+    strokeBtn.textContent = '筆順';
+    strokeBtn.title = '根據教育局學習字詞表指引播放筆順';
+
+    btnBar.appendChild(hintBtn);
+    btnBar.appendChild(strokeBtn);
+    wrap.appendChild(btnBar);
     gridEl.appendChild(wrap);
 
     const cs = {
@@ -1124,21 +1190,37 @@ function buildCanvasGrid(text, gridEl, savedStrokes = null) {
       isDrawing: false,
       char,
       submitted: false,
+      showHintChar: false,
+      hintBtn,
+      hwContainer,
+      hintContainer,
     };
     state.canvasStates.push(cs);
-    drawTianZiGe(cs.ctx, CANVAS_SIZE, CANVAS_SIZE);
     bindCanvasEvents(cs, canvas);
-    if (cs.strokes.length > 0) {
-      redrawCanvas(cs);
-    }
+    redrawCanvas(cs);
+
+    hintBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      cs.showHintChar = !cs.showHintChar;
+      hintBtn.style.background = cs.showHintChar ? '#edf2f7' : '#fff';
+      hintBtn.style.borderColor = cs.showHintChar ? '#718096' : '#cbd5e0';
+      hintBtn.style.color = cs.showHintChar ? '#1a202c' : '#4a5568';
+      hintBtn.style.fontWeight = cs.showHintChar ? '700' : 'normal';
+      if (cs.hintContainer) {
+        cs.hintContainer.style.visibility = cs.showHintChar ? 'visible' : 'hidden';
+      }
+    });
+
+    strokeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      playBoxStrokeOrder(char, hwContainer, boxSize);
+    });
   });
 }
 
 // ====== CANVAS DRAWING ======
 function drawTianZiGe(ctx, w, h) {
   ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0, 0, w, h);
 
   ctx.strokeStyle = '#d0d0e0';
   ctx.lineWidth = 3.5;
@@ -1171,9 +1253,13 @@ function drawTianZiGe(ctx, w, h) {
 }
 
 function redrawCanvas(cs) {
-  const { ctx, canvas, strokes } = cs;
+  const { ctx, canvas, strokes, hintContainer, showHintChar } = cs;
   const size = canvas.width;
   drawTianZiGe(ctx, size, size);
+
+  if (hintContainer) {
+    hintContainer.style.visibility = showHintChar ? 'visible' : 'hidden';
+  }
 
   ctx.strokeStyle = '#333';
   ctx.lineWidth = 8;
@@ -1181,7 +1267,14 @@ function redrawCanvas(cs) {
   ctx.lineJoin = 'round';
 
   strokes.forEach(points => {
-    if (points.length < 2) return;
+    if (points.length === 0) return;
+    if (points.length === 1) {
+      ctx.beginPath();
+      ctx.arc(points[0].x, points[0].y, ctx.lineWidth / 2, 0, Math.PI * 2);
+      ctx.fillStyle = ctx.strokeStyle;
+      ctx.fill();
+      return;
+    }
     ctx.beginPath();
     ctx.moveTo(points[0].x, points[0].y);
     for (let i = 1; i < points.length - 1; i++) {
@@ -1211,6 +1304,7 @@ function bindCanvasEvents(cs, canvas) {
     cs.isDrawing = true;
     cs.currentStroke = [pos];
     cs.strokes.push(cs.currentStroke);
+    redrawCanvas(cs);
   };
 
   const moveDraw = (e) => {
@@ -1266,7 +1360,16 @@ function saveCurrentCanvasState() {
   const session = state.session;
   if (session && state.canvasStates.length > 0) {
     const item = session.items[session.currentIndex];
-    item.canvasImages = state.canvasStates.map(cs => cs.canvas.toDataURL());
+    item.canvasImages = state.canvasStates.map(cs => {
+      const tmp = document.createElement('canvas');
+      tmp.width = cs.canvas.width;
+      tmp.height = cs.canvas.height;
+      const tctx = tmp.getContext('2d');
+      tctx.fillStyle = '#fff';
+      tctx.fillRect(0, 0, tmp.width, tmp.height);
+      tctx.drawImage(cs.canvas, 0, 0);
+      return tmp.toDataURL();
+    });
     item.canvasStrokes = state.canvasStates.map(cs => JSON.parse(JSON.stringify(cs.strokes)));
   }
 }
@@ -1366,14 +1469,14 @@ function showResults() {
       const images = item.canvasImages || [];
       let canvasRow = '';
       if (images.length) {
-        canvasRow = `<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0 0">`;
+        canvasRow = `<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(135px, 220px));gap:16px;justify-content:center;margin:16px 0 8px;width:100%">`;
         chars.forEach((ch, j) => {
           const img = images[j];
           if (img) {
-            canvasRow += `<div style="text-align:center;width:72px">
-              <img src="${img}" style="width:68px;height:68px;border-radius:8px;border:1px solid #cbd5e0;background:#fff;display:block">
-              <div style="font-size:.9em;font-weight:700;margin-top:4px;color:#2d3748">${escHtml(ch)}</div>
-              <button class="btn btn-outline btn-sm" style="margin-top:4px;font-size:.72em;padding:3px 8px;border-width:1px" onclick="showStrokeOrder(this, '${escHtml(ch)}', ${i*100+j})">${_('筆順')}</button>
+            canvasRow += `<div style="text-align:center;display:flex;flex-direction:column;align-items:center">
+              <img src="${img}" style="width:100%;aspect-ratio:1/1;max-width:220px;border-radius:12px;border:2px solid #cbd5e0;background:#fff;display:block;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
+              <div style="font-size:1.2em;font-weight:700;margin-top:8px;color:#2d3748">${escHtml(ch)}</div>
+              <button class="btn btn-outline btn-sm" style="margin-top:6px;font-size:.85em;padding:4px 14px;border-width:1px" onclick="showStrokeOrder(this, '${escHtml(ch)}', ${i*100+j})">${_('筆順')}</button>
             </div>`;
           }
         });
