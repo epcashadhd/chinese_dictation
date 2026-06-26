@@ -190,7 +190,7 @@ textarea:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.12)}
   <div class="list-header-row" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:12px">
     <span style="font-size:.95em;color:#4a5568;font-weight:700" data-t="默書清單（每行一個詞語或句子，也可用逗號分隔）">默書清單（每行一個詞語或句子，也可用逗號分隔）</span>
     <div style="display:flex;align-items:center;gap:10px">
-      <button class="btn btn-sm" id="shuffleToggle" onclick="toggleShuffle()" style="background:transparent;border:2px solid #cbd5e0;color:#4a5568;border-radius:50px;padding:6px 18px;font-size:.88em;cursor:pointer;transition:all .2s;font-weight:700">
+      <button class="btn btn-sm" id="shuffleToggle" onclick="toggleShuffle()" style="background:transparent;border:2px solid #cbd5e0;color:#4a5568;border-radius:50px;padding:6px 18px;font-size:.88em;cursor:pointer;transition:all .2s;font-weight:700;opacity:.45">
         隨機排序
       </button>
       <button class="btn btn-sm" onclick="saveCustomListPrompt()" style="background:transparent;border:2px solid #cbd5e0;color:#4a5568;border-radius:50px;padding:6px 18px;font-size:.88em;cursor:pointer;transition:all .2s;font-weight:700" data-t="儲存清單">
@@ -223,7 +223,6 @@ textarea:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.12)}
         <div class="canvas-grid" id="flipCanvasGrid"></div>
         <div class="dict-controls">
           <button class="btn btn-outline btn-sm" onclick="speakCurrent()" data-t="朗讀">朗讀</button>
-          <span id="ttsDebug" style="font-size:.78em;color:#718096;margin-left:4px;align-self:center;font-weight:600"></span>
           <button class="btn btn-outline btn-sm" onclick="clearAllCanvas()" data-t="清空">清空</button>
           <button class="btn btn-outline btn-sm" onclick="undoLastStroke()" data-t="復原">復原</button>
         </div>
@@ -828,10 +827,12 @@ function updateShuffleBtn() {
     btn.style.background = '#667eea';
     btn.style.borderColor = '#667eea';
     btn.style.color = '#fff';
+    btn.style.opacity = '1';
   } else {
     btn.style.background = 'transparent';
     btn.style.borderColor = '#cbd5e0';
     btn.style.color = '#4a5568';
+    btn.style.opacity = '0.45';
   }
 }
 
@@ -918,23 +919,16 @@ function speakCurrent() {
   if (_ttsAudio) { try { _ttsAudio.pause(); } catch(e) {} _ttsAudio = null; }
 
   const mandarin = isMan();
-  const dbg = document.getElementById('ttsDebug');
-
   const tl = mandarin ? 'zh-CN' : 'yue';
-  const label = mandarin ? '普通話發音' : '粵語發音';
   const cleaned = onlyChinese(text);
-  if (!cleaned) { if (dbg) dbg.textContent = '無中文字可朗讀'; return; }
+  if (!cleaned) return;
   const ttsText = mandarin ? toS(cleaned) : cleaned;
   const audio = new Audio();
   audio.referrerPolicy = 'no-referrer';
   audio.src = 'https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=' + tl + '&q=' + encodeURIComponent(ttsText) + '&client=gtx';
   _ttsAudio = audio;
   audio.onended = () => { _ttsAudio = null; };
-  audio.play().then(() => {
-    if (dbg) { dbg.textContent = label; setTimeout(() => { dbg.textContent = ''; }, 3000); }
-  }).catch(() => {
-    if (dbg) dbg.textContent = '語音播放受限';
-  });
+  audio.play().catch(() => {});
 }
 
 // ====== BUILD CANVAS GRID ======
